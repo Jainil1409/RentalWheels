@@ -1,0 +1,51 @@
+@model RegisterViewModel
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="auth-page">
+    <div class="auth-card" style="max-width: 520px;">
+        <img src="~/images/logo.png" alt="RentWheels" class="auth-logo" />
+        <h3>Create Account</h3>
+        <p class="auth-subtitle">Join RentWheels and start renting vehicles today</p>
+        <form asp-action="Register" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <div class="mb-3">
+                <label asp-for="FullName" class="form-label"><i class="bi bi-person me-1"></i>Full Name</label>
+                <input asp-for="FullName" class="form-control" placeholder="John Doe" />
+                <span asp-validation-for="FullName" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label"><i class="bi bi-envelope me-1"></i>Email</label>
+                <input asp-for="Email" class="form-control" placeholder="you@example.com" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Phone" class="form-label"><i class="bi bi-telephone me-1"></i>Phone</label>
+                <input asp-for="Phone" class="form-control" placeholder="1234567890" />
+                <span asp-validation-for="Phone" class="text-danger"></span>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Password" class="form-label"><i class="bi bi-lock me-1"></i>Password</label>
+                    <input asp-for="Password" class="form-control" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="ConfirmPassword" class="form-label"><i class="bi bi-lock-fill me-1"></i>Confirm</label>
+                    <input asp-for="ConfirmPassword" class="form-control" />
+                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary w-100 btn-lg">
+                <i class="bi bi-person-plus me-2"></i>Create Account
+            </button>
+        </form>
+        <div class="auth-divider">or</div>
+        <p class="text-center mb-0">Already have an account? <a asp-action="Login" class="fw-semibold">Sign in</a></p>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

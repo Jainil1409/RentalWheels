@@ -1,0 +1,92 @@
+@model DashboardViewModel
+@{
+    ViewData["Title"] = "Reports Dashboard";
+}
+
+<div class="section-header animate-fade-in-up">
+    <h2><i class="bi bi-graph-up-arrow me-2 text-gradient"></i>Reports Dashboard</h2>
+    <p>Key metrics and analytics overview.</p>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-4 col-md-6 scroll-animate">
+        <div class="stat-card primary">
+            <div class="stat-icon"><i class="bi bi-car-front-fill"></i></div>
+            <div class="stat-value" data-count="@Model.TotalVehicles">0</div>
+            <div class="stat-label">Total Vehicles</div>
+            <div class="stat-sub">@Model.AvailableVehicles available</div>
+        </div>
+    </div>
+    <div class="col-lg-4 col-md-6 scroll-animate">
+        <div class="stat-card success">
+            <div class="stat-icon"><i class="bi bi-people-fill"></i></div>
+            <div class="stat-value" data-count="@Model.TotalCustomers">0</div>
+            <div class="stat-label">Registered Customers</div>
+        </div>
+    </div>
+    <div class="col-lg-4 col-md-6 scroll-animate">
+        <div class="stat-card info">
+            <div class="stat-icon"><i class="bi bi-cash-stack"></i></div>
+            <div class="stat-value" data-count="@Model.TotalRevenue" data-prefix="₹" data-decimals="2">₹0</div>
+            <div class="stat-label">Total Revenue</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-lg-4 col-md-6 scroll-animate">
+        <div class="stat-card warning">
+            <div class="stat-icon"><i class="bi bi-key-fill"></i></div>
+            <div class="stat-value" data-count="@Model.ActiveRentals">0</div>
+            <div class="stat-label">Active Rentals</div>
+        </div>
+    </div>
+    <div class="col-lg-4 col-md-6 scroll-animate">
+        <div class="stat-card primary">
+            <div class="stat-icon"><i class="bi bi-hourglass-split"></i></div>
+            <div class="stat-value" data-count="@Model.PendingBookings">0</div>
+            <div class="stat-label">Pending Bookings</div>
+        </div>
+    </div>
+    <div class="col-lg-4 col-md-6 scroll-animate">
+        <div class="stat-card danger">
+            <div class="stat-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+            <div class="stat-value" data-count="@Model.OverdueRentals">0</div>
+            <div class="stat-label">Overdue Rentals</div>
+        </div>
+    </div>
+</div>
+
+<div class="section-header scroll-animate">
+    <h2 style="font-size:1.3rem;">Detailed Reports</h2>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-4 scroll-animate">
+        <a asp-action="VehicleUsage" class="text-decoration-none">
+            <div class="stat-card primary hover-lift" style="cursor:pointer;">
+                <div class="stat-icon"><i class="bi bi-speedometer2"></i></div>
+                <div class="stat-label" style="font-size:1rem;font-weight:600;color:var(--dark);">Vehicle Usage Report</div>
+                <div class="stat-sub">Booking popularity by vehicle</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4 scroll-animate">
+        <a asp-action="RentalHistory" class="text-decoration-none">
+            <div class="stat-card warning hover-lift" style="cursor:pointer;">
+                <div class="stat-icon"><i class="bi bi-clock-history"></i></div>
+                <div class="stat-label" style="font-size:1rem;font-weight:600;color:var(--dark);">Rental History Report</div>
+                <div class="stat-sub">Complete rental transaction records</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4 scroll-animate">
+        <a asp-action="PaymentReport" class="text-decoration-none">
+            <div class="stat-card success hover-lift" style="cursor:pointer;">
+                <div class="stat-icon"><i class="bi bi-cash-coin"></i></div>
+                <div class="stat-label" style="font-size:1rem;font-weight:600;color:var(--dark);">Payment Report</div>
+                <div class="stat-sub">Financial summary and analysis</div>
+            </div>
+        </a>
+    </div>
+</div>

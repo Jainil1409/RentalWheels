@@ -1,0 +1,135 @@
+@model PaymentCreateViewModel
+@{
+    ViewData["Title"] = "Make Payment";
+}
+
+<div class="section-header animate-fade-in-up">
+    <h2>
+        <img src="~/images/logo.png" alt="RentWheels" style="height:56px;object-fit:contain;vertical-align:middle;margin-right:10px;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.12));" />
+        Make Payment
+    </h2>
+    <p>Complete your booking payment securely.</p>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6 animate-fade-in-left">
+        <div class="summary-card">
+            <div class="summary-header">
+                <h5 class="mb-0"><i class="bi bi-receipt me-2"></i>Booking Summary</h5>
+            </div>
+            <div class="summary-body">
+                @if (Model.Booking != null)
+                {
+                    <div class="summary-row">
+                        <span class="text-muted">Booking ID</span>
+                        <strong>#@Model.BookingId</strong>
+                    </div>
+                    <div class="summary-row">
+                        <span class="text-muted">Vehicle</span>
+                        <strong>@Model.Booking.Vehicle.Brand @Model.Booking.Vehicle.Model</strong>
+                    </div>
+                    <div class="summary-row">
+                        <span class="text-muted">Type</span>
+                        <span class="badge bg-primary">@Model.Booking.Vehicle.Type</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="text-muted">Period</span>
+                        <span>@Model.Booking.StartDate.ToString("MMM dd") &mdash; @Model.Booking.EndDate.ToString("MMM dd, yyyy")</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="text-muted">Duration</span>
+                        <span>@((Model.Booking.EndDate - Model.Booking.StartDate).Days) days</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="text-muted">Rate</span>
+                        <span>₹@Model.Booking.Vehicle.PricePerDay.ToString("N2") / day</span>
+                    </div>
+                    <hr />
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="fw-bold" style="font-size:1.1rem;">Total Amount</span>
+                        <span class="summary-total">₹@Model.Booking.TotalCost.ToString("N2")</span>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6 animate-fade-in-right">
+        <div class="vrms-form-card">
+            <h5 class="mb-4"><i class="bi bi-shield-check me-2"></i>Choose Payment Method</h5>
+            <form asp-action="Create" method="post" id="paymentForm">
+                <input type="hidden" asp-for="BookingId" />
+                <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                <div class="mb-4">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <input type="radio" class="btn-check" name="Method" id="methodCash" value="Cash" checked autocomplete="off" />
+                            <label class="btn btn-outline-success w-100 py-3" for="methodCash" id="cashBtnLabel">
+                                <i class="bi bi-cash-stack d-block mb-1" style="font-size:1.5rem;"></i>
+                                <strong>Cash</strong>
+                                <small class="d-block" style="opacity:0.7;">Pay at counter</small>
+                            </label>
+                        </div>
+                        <div class="col-6">
+                            <input type="radio" class="btn-check" name="Method" id="methodStripe" value="Stripe" autocomplete="off" />
+                            <label class="btn btn-outline-primary w-100 py-3" for="methodStripe" id="stripeBtnLabel">
+                                <i class="bi bi-stripe d-block mb-1" style="font-size:1.5rem;"></i>
+                                <strong>Stripe</strong>
+                                <small class="d-block" style="opacity:0.7;">Card payment</small>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="cashInfo" class="alert alert-success mb-4" style="display:block;">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Cash payment will be recorded immediately. Please pay the amount at the counter.
+                </div>
+
+                <div id="stripeInfo" class="alert alert-info mb-4" style="display:none;">
+                    <i class="bi bi-lock-fill me-2"></i>
+                    You will be redirected to Stripe's secure checkout page to complete card payment.
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-success flex-fill" id="payBtn">
+                        <i class="bi bi-check-circle me-1"></i>Pay with Cash
+                    </button>
+                    <a asp-controller="Bookings" asp-action="MyBookings" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const cashRadio = document.getElementById('methodCash');
+            const stripeRadio = document.getElementById('methodStripe');
+            const cashInfo = document.getElementById('cashInfo');
+            const stripeInfo = document.getElementById('stripeInfo');
+            const payBtn = document.getElementById('payBtn');
+
+            function updateUI() {
+                if (stripeRadio.checked) {
+                    cashInfo.style.display = 'none';
+                    stripeInfo.style.display = 'block';
+                    payBtn.className = 'btn btn-primary flex-fill';
+                    payBtn.innerHTML = '<i class="bi bi-stripe me-1"></i>Pay with Stripe';
+                } else {
+                    cashInfo.style.display = 'block';
+                    stripeInfo.style.display = 'none';
+                    payBtn.className = 'btn btn-success flex-fill';
+                    payBtn.innerHTML = '<i class="bi bi-check-circle me-1"></i>Pay with Cash';
+                }
+            }
+
+            cashRadio.addEventListener('change', updateUI);
+            stripeRadio.addEventListener('change', updateUI);
+        });
+    </script>
+}

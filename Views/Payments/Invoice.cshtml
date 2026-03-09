@@ -1,0 +1,162 @@
+@model Payment
+@{
+    ViewData["Title"] = $"Invoice {Model.InvoiceNumber}";
+    var days = (Model.Booking.EndDate - Model.Booking.StartDate).Days;
+}
+
+<div class="section-header animate-fade-in-up">
+    <h2><i class="bi bi-file-earmark-text me-2 text-gradient"></i>Payment Invoice</h2>
+    <p>Invoice generated for your completed payment.</p>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0 animate-fade-in-up" id="invoiceCard" style="border-radius:var(--radius-lg);">
+            <!-- Invoice Header -->
+            <div class="card-header text-white px-4 py-4" style="background:var(--gradient-primary);border-radius:var(--radius-lg) var(--radius-lg) 0 0;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <img src="~/images/logo.png" alt="RentWheels" style="height:80px;object-fit:contain;margin-right:14px;" />
+                        <div>
+                            <h5 class="mb-0" style="font-weight:700;">RentWheels</h5>
+                            <small class="text-white-50">Invoice for rental booking</small>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <h5 class="mb-1">INVOICE</h5>
+                        <span class="badge bg-white text-dark" style="font-size:0.85rem;">@Model.InvoiceNumber</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body p-4">
+                <!-- Customer & Payment Info -->
+                <div class="row mb-4">
+                    <div class="col-sm-6">
+                        <h6 class="text-muted mb-2"><i class="bi bi-person me-1"></i>Billed To</h6>
+                        <strong>@Model.Booking.Customer.FullName</strong><br />
+                        <span class="text-muted">@Model.Booking.Customer.Email</span><br />
+                        <span class="text-muted">@Model.Booking.Customer.Phone</span>
+                    </div>
+                    <div class="col-sm-6 text-sm-end">
+                        <h6 class="text-muted mb-2"><i class="bi bi-calendar me-1"></i>Invoice Details</h6>
+                        <strong>Date:</strong> @Model.PaymentDate.ToString("MMMM dd, yyyy")<br />
+                        <strong>Payment ID:</strong> #@Model.Id<br />
+                        <strong>Method:</strong>
+                        @if (Model.Method == PaymentMethod.Stripe)
+                        {
+                            <span class="badge bg-primary"><i class="bi bi-stripe me-1"></i>Stripe</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success"><i class="bi bi-cash-coin me-1"></i>Cash</span>
+                        }
+                    </div>
+                </div>
+
+                <hr />
+
+                <!-- Booking Details -->
+                <h6 class="mb-3"><i class="bi bi-car-front me-1"></i>Rental Details</h6>
+                <div class="table-responsive mb-4">
+                    <table class="table table-borderless">
+                        <thead style="background:var(--light);border-radius:8px;">
+                            <tr>
+                                <th>Description</th>
+                                <th class="text-center">Days</th>
+                                <th class="text-end">Rate/Day</th>
+                                <th class="text-end">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <strong>@Model.Booking.Vehicle.Brand @Model.Booking.Vehicle.Model</strong>
+                                    <br />
+                                    <small class="text-muted">
+                                        @Model.Booking.Vehicle.Type &bull;
+                                        @Model.Booking.Vehicle.Year &bull;
+                                        @Model.Booking.Vehicle.LicensePlate
+                                    </small>
+                                    <br />
+                                    <small class="text-muted">
+                                        @Model.Booking.StartDate.ToString("MMM dd, yyyy") &mdash; @Model.Booking.EndDate.ToString("MMM dd, yyyy")
+                                    </small>
+                                </td>
+                                <td class="text-center align-middle">@days</td>
+                                <td class="text-end align-middle">₹@Model.Booking.Vehicle.PricePerDay.ToString("N2")</td>
+                                <td class="text-end align-middle"><strong>₹@Model.Amount.ToString("N2")</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Total -->
+                <div class="d-flex justify-content-end">
+                    <div style="min-width:250px;">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Subtotal</span>
+                            <span>₹@Model.Amount.ToString("N2")</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Tax</span>
+                            <span>₹0.00</span>
+                        </div>
+                        <hr class="my-2" />
+                        <div class="d-flex justify-content-between">
+                            <strong style="font-size:1.15rem;">Total Paid</strong>
+                            <strong style="font-size:1.15rem;color:var(--success);">₹@Model.Amount.ToString("N2")</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="mt-4" />
+
+                <!-- Status & Stripe Ref -->
+                <div class="row">
+                    <div class="col-sm-6">
+                        <span class="badge bg-success" style="font-size:0.9rem;padding:0.5rem 1rem;">
+                            <i class="bi bi-check-circle me-1"></i>Payment Completed
+                        </span>
+                    </div>
+                    <div class="col-sm-6 text-sm-end">
+                        @if (!string.IsNullOrEmpty(Model.StripePaymentIntentId))
+                        {
+                            <small class="text-muted">Stripe Ref: @Model.StripePaymentIntentId</small>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="card-footer text-center text-muted py-3" style="background:var(--light);border-radius:0 0 var(--radius-lg) var(--radius-lg);">
+                <small>Thank you for choosing RentWheels! For any queries, contact support&#64;rentwheels.com</small>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="d-flex gap-2 mt-4 justify-content-center animate-fade-in-up">
+            <button onclick="window.print();" class="btn btn-primary">
+                <i class="bi bi-printer me-1"></i>Print Invoice
+            </button>
+            <a asp-controller="Bookings" asp-action="MyBookings" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Back to My Bookings
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    @@media print {
+        .vrms-navbar, .vrms-footer, .section-header p, .btn, nav, footer {
+            display: none !important;
+        }
+        .section-header h2 {
+            font-size: 1.2rem;
+        }
+        #invoiceCard {
+            box-shadow: none !important;
+            border: 1px solid #ddd !important;
+        }
+    }
+</style>

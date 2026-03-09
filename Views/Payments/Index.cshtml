@@ -1,0 +1,121 @@
+@model List<Payment>
+@{
+    ViewData["Title"] = "Payments";
+}
+
+<div class="section-header animate-fade-in-up">
+    <h2><i class="bi bi-wallet2 me-2 text-gradient"></i>All Payments</h2>
+    <p>Track all payment transactions in the system.</p>
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="alert alert-info animate-fade-in-up">
+        <i class="bi bi-info-circle me-2"></i>No payments recorded yet.
+    </div>
+}
+else
+{
+    <div class="row g-4 mb-4">
+        <div class="col-md-3 scroll-animate">
+            <div class="stat-card success">
+                <div class="stat-icon"><i class="bi bi-cash-stack"></i></div>
+                <div class="stat-value" data-count="@Model.Where(p => p.Status == PaymentStatus.Completed).Sum(p => p.Amount)" data-prefix="₹" data-decimals="2">₹0</div>
+                <div class="stat-label">Total Collected</div>
+            </div>
+        </div>
+        <div class="col-md-3 scroll-animate">
+            <div class="stat-card primary">
+                <div class="stat-icon"><i class="bi bi-receipt"></i></div>
+                <div class="stat-value" data-count="@Model.Count">0</div>
+                <div class="stat-label">Total Transactions</div>
+            </div>
+        </div>
+        <div class="col-md-3 scroll-animate">
+            <div class="stat-card info">
+                <div class="stat-icon"><i class="bi bi-cash-coin"></i></div>
+                <div class="stat-value" data-count="@Model.Count(p => p.Method == PaymentMethod.Cash)">0</div>
+                <div class="stat-label">Cash Payments</div>
+            </div>
+        </div>
+        <div class="col-md-3 scroll-animate">
+            <div class="stat-card warning">
+                <div class="stat-icon"><i class="bi bi-stripe"></i></div>
+                <div class="stat-value" data-count="@Model.Count(p => p.Method == PaymentMethod.Stripe)">0</div>
+                <div class="stat-label">Stripe Payments</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="vrms-table scroll-animate">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Customer</th>
+                        <th>Vehicle</th>
+                        <th>Booking</th>
+                        <th>Amount</th>
+                        <th>Method</th>
+                        <th>Status</th>
+                        <th>Invoice</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var payment in Model)
+                    {
+                        <tr>
+                            <td><strong>#@payment.Id</strong></td>
+                            <td>@payment.Booking.Customer.FullName</td>
+                            <td>@payment.Booking.Vehicle.Brand @payment.Booking.Vehicle.Model</td>
+                            <td>#@payment.BookingId</td>
+                            <td><strong>₹@payment.Amount.ToString("N2")</strong></td>
+                            <td>
+                                @if (payment.Method == PaymentMethod.Stripe)
+                                {
+                                    <span class="badge bg-primary"><i class="bi bi-stripe me-1"></i>Stripe</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success"><i class="bi bi-cash-coin me-1"></i>Cash</span>
+                                }
+                            </td>
+                            <td>
+                                @switch (payment.Status)
+                                {
+                                    case PaymentStatus.Completed:
+                                        <span class="badge bg-success">Completed</span>
+                                        break;
+                                    case PaymentStatus.Pending:
+                                        <span class="badge bg-warning">Pending</span>
+                                        break;
+                                    case PaymentStatus.Failed:
+                                        <span class="badge bg-danger">Failed</span>
+                                        break;
+                                    case PaymentStatus.Refunded:
+                                        <span class="badge bg-info">Refunded</span>
+                                        break;
+                                }
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(payment.InvoiceNumber))
+                                {
+                                    <a asp-action="Invoice" asp-route-paymentId="@payment.Id" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-file-earmark-text"></i>
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">&mdash;</span>
+                                }
+                            </td>
+                            <td>@payment.PaymentDate.ToString("MMM dd, yyyy HH:mm")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

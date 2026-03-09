@@ -1,0 +1,132 @@
+@model List<Booking>
+@{
+    ViewData["Title"] = "All Bookings";
+}
+
+<div class="section-header animate-fade-in-up">
+    <h2><i class="bi bi-journal-text me-2 text-gradient"></i>All Bookings</h2>
+    <p>Manage all customer booking requests.</p>
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="alert alert-info animate-fade-in-up">
+        <i class="bi bi-info-circle me-2"></i>No bookings yet.
+    </div>
+}
+else
+{
+    <div class="vrms-table scroll-animate">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Customer</th>
+                        <th>Vehicle</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Days</th>
+                        <th>Total Cost</th>
+                        <th>Status</th>
+                        <th>Payment</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var booking in Model)
+                    {
+                        <tr>
+                            <td><strong>#@booking.Id</strong></td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="user-avatar" style="width:32px;height:32px;border-radius:50%;background:var(--gradient);display:flex;align-items:center;justify-content:center;color:white;font-size:0.75rem;font-weight:600;min-width:32px;">
+                                        @booking.Customer.FullName.Substring(0,1).ToUpper()
+                                    </div>
+                                    <span class="ms-2">@booking.Customer.FullName</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    @if (!string.IsNullOrEmpty(booking.Vehicle.ImageUrl))
+                                    {
+                                        <img src="@booking.Vehicle.ImageUrl" alt="@booking.Vehicle.Brand @booking.Vehicle.Model" style="width:36px;height:36px;border-radius:8px;min-width:36px;object-fit:cover;" loading="lazy" />
+                                    }
+                                    else
+                                    {
+                                        <div class="vehicle-img-placeholder @booking.Vehicle.Type.ToString().ToLower()" style="width:36px;height:36px;border-radius:8px;min-width:36px;">
+                                            <i class="bi bi-car-front-fill" style="font-size:0.9rem;"></i>
+                                        </div>
+                                    }
+                                    <span class="ms-2"><strong>@booking.Vehicle.Brand</strong> @booking.Vehicle.Model</span>
+                                </div>
+                            </td>
+                            <td>@booking.StartDate.ToString("MMM dd, yyyy")</td>
+                            <td>@booking.EndDate.ToString("MMM dd, yyyy")</td>
+                            <td>@((booking.EndDate - booking.StartDate).Days)</td>
+                            <td><strong>₹@booking.TotalCost.ToString("N2")</strong></td>
+                            <td>
+                                @switch (booking.Status)
+                                {
+                                    case BookingStatus.Pending:
+                                        <span class="badge bg-warning">Pending</span>
+                                        break;
+                                    case BookingStatus.Approved:
+                                        <span class="badge bg-success">Approved</span>
+                                        break;
+                                    case BookingStatus.Rejected:
+                                        <span class="badge bg-danger">Rejected</span>
+                                        break;
+                                    case BookingStatus.Completed:
+                                        <span class="badge bg-info">Completed</span>
+                                        break;
+                                    case BookingStatus.Cancelled:
+                                        <span class="badge bg-secondary">Cancelled</span>
+                                        break;
+                                }
+                            </td>
+                            <td>
+                                @if (booking.Payment != null)
+                                {
+                                    <span class="badge bg-success"><i class="bi bi-check me-1"></i>@booking.Payment.Method</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">&mdash;</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    @if (booking.Status == BookingStatus.Pending)
+                                    {
+                                        <form asp-action="Approve" asp-route-id="@booking.Id" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-success" title="Approve">
+                                                <i class="bi bi-check-lg"></i>
+                                            </button>
+                                        </form>
+                                        <form asp-action="Reject" asp-route-id="@booking.Id" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-danger" title="Reject">
+                                                <i class="bi bi-x-lg"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                    @if (booking.Status == BookingStatus.Approved)
+                                    {
+                                        <form asp-action="Complete" asp-route-id="@booking.Id" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-info" title="Complete">
+                                                <i class="bi bi-check-circle"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

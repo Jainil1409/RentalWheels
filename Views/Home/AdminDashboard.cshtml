@@ -1,0 +1,125 @@
+@model DashboardViewModel
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="section-header animate-fade-in-up">
+    <h2><i class="bi bi-speedometer2 me-2 text-gradient"></i>Admin Dashboard</h2>
+    <p>Welcome back! Here's an overview of your vehicle rental system.</p>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-3 col-md-6 scroll-animate">
+        <div class="stat-card primary">
+            <div class="stat-icon"><i class="bi bi-car-front-fill"></i></div>
+            <div class="stat-value" data-count="@Model.TotalVehicles">0</div>
+            <div class="stat-label">Total Vehicles</div>
+            <div class="stat-sub"><i class="bi bi-check-circle me-1"></i>@Model.AvailableVehicles available</div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 scroll-animate">
+        <div class="stat-card success">
+            <div class="stat-icon"><i class="bi bi-people-fill"></i></div>
+            <div class="stat-value" data-count="@Model.TotalCustomers">0</div>
+            <div class="stat-label">Customers</div>
+            <div class="stat-sub">Registered users</div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 scroll-animate">
+        <div class="stat-card warning">
+            <div class="stat-icon"><i class="bi bi-key-fill"></i></div>
+            <div class="stat-value" data-count="@Model.ActiveRentals">0</div>
+            <div class="stat-label">Active Rentals</div>
+            <div class="stat-sub"><i class="bi bi-hourglass-split me-1"></i>@Model.PendingBookings pending</div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 scroll-animate">
+        <div class="stat-card info">
+            <div class="stat-icon"><i class="bi bi-cash-stack"></i></div>
+            <div class="stat-value" data-count="@Model.TotalRevenue" data-prefix="₹" data-decimals="2">₹0</div>
+            <div class="stat-label">Revenue</div>
+            <div class="stat-sub">Total collected</div>
+        </div>
+    </div>
+</div>
+
+@if (Model.OverdueRentals > 0)
+{
+    <div class="alert alert-danger animate-fade-in-up mb-4">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <strong>@Model.OverdueRentals overdue rental(s)</strong> require immediate attention.
+    </div>
+}
+
+<div class="row g-4">
+    <div class="col-lg-6 scroll-animate">
+        <div class="quick-action-card">
+            <div class="card-header">
+                <i class="bi bi-lightning-fill me-2"></i>Quick Actions
+            </div>
+            <a asp-controller="Vehicles" asp-action="Create" class="quick-action-item">
+                <div class="action-icon primary"><i class="bi bi-plus-circle-fill"></i></div>
+                <div>
+                    <strong>Add New Vehicle</strong>
+                    <small class="d-block text-muted">Register a new vehicle to the fleet</small>
+                </div>
+            </a>
+            <a asp-controller="Bookings" asp-action="AllBookings" class="quick-action-item">
+                <div class="action-icon warning"><i class="bi bi-journal-text"></i></div>
+                <div>
+                    <strong>Manage Bookings</strong>
+                    <small class="d-block text-muted">Approve, reject, or complete bookings</small>
+                </div>
+            </a>
+            <a asp-controller="Payments" asp-action="Index" class="quick-action-item">
+                <div class="action-icon success"><i class="bi bi-credit-card-2-front"></i></div>
+                <div>
+                    <strong>View Payments</strong>
+                    <small class="d-block text-muted">Track all payment transactions</small>
+                </div>
+            </a>
+            <a asp-controller="Vehicles" asp-action="Index" class="quick-action-item">
+                <div class="action-icon info"><i class="bi bi-car-front"></i></div>
+                <div>
+                    <strong>Vehicle Fleet</strong>
+                    <small class="d-block text-muted">Browse and manage all vehicles</small>
+                </div>
+            </a>
+        </div>
+    </div>
+    <div class="col-lg-6 scroll-animate">
+        <div class="quick-action-card">
+            <div class="card-header">
+                <i class="bi bi-bar-chart-fill me-2"></i>Reports
+            </div>
+            <a asp-controller="Reports" asp-action="Index" class="quick-action-item">
+                <div class="action-icon primary"><i class="bi bi-graph-up-arrow"></i></div>
+                <div>
+                    <strong>Reports Dashboard</strong>
+                    <small class="d-block text-muted">Overview of all key metrics</small>
+                </div>
+            </a>
+            <a asp-controller="Reports" asp-action="VehicleUsage" class="quick-action-item">
+                <div class="action-icon info"><i class="bi bi-speedometer2"></i></div>
+                <div>
+                    <strong>Vehicle Usage Report</strong>
+                    <small class="d-block text-muted">See which vehicles are most popular</small>
+                </div>
+            </a>
+            <a asp-controller="Reports" asp-action="RentalHistory" class="quick-action-item">
+                <div class="action-icon warning"><i class="bi bi-clock-history"></i></div>
+                <div>
+                    <strong>Rental History</strong>
+                    <small class="d-block text-muted">Complete rental transaction records</small>
+                </div>
+            </a>
+            <a asp-controller="Reports" asp-action="PaymentReport" class="quick-action-item">
+                <div class="action-icon success"><i class="bi bi-cash-coin"></i></div>
+                <div>
+                    <strong>Payment Report</strong>
+                    <small class="d-block text-muted">Financial summary and analysis</small>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>

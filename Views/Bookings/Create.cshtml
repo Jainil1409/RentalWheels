@@ -1,0 +1,67 @@
+@model BookingCreateViewModel
+@{
+    ViewData["Title"] = "Book Vehicle";
+}
+
+<div class="section-header animate-fade-in-up">
+    <h2><i class="bi bi-calendar-plus me-2 text-gradient"></i>Book Vehicle</h2>
+    <p>Complete the form below to reserve your vehicle.</p>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-7 animate-fade-in-left">
+        <div class="vrms-form-card">
+            @if (Model.Vehicle != null)
+            {
+                <div class="d-flex align-items-center mb-4 pb-3" style="border-bottom:1px solid var(--gray-200);">
+                    @if (!string.IsNullOrEmpty(Model.Vehicle.ImageUrl))
+                    {
+                        <img src="@Model.Vehicle.ImageUrl" alt="@Model.Vehicle.Brand @Model.Vehicle.Model" style="width:80px;height:80px;border-radius:var(--radius);min-width:80px;object-fit:cover;" loading="lazy" />
+                    }
+                    else
+                    {
+                        <div class="vehicle-img-placeholder @Model.Vehicle.Type.ToString().ToLower()" style="width:80px;height:80px;border-radius:var(--radius);min-width:80px;">
+                            <i class="bi bi-car-front-fill" style="font-size:2rem;"></i>
+                        </div>
+                    }
+                    <div class="ms-3">
+                        <h4 class="mb-0">@Model.Vehicle.Brand @Model.Vehicle.Model</h4>
+                        <span class="text-muted">@Model.Vehicle.Year &middot; @Model.Vehicle.Type</span>
+                        <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:1.25rem;color:var(--primary);">
+                            ₹@Model.Vehicle.PricePerDay.ToString("N2") <span style="font-size:0.85rem;font-weight:400;color:var(--gray-500);">/ day</span>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <form asp-action="Create" method="post">
+                <input type="hidden" asp-for="VehicleId" />
+                <div asp-validation-summary="All" class="text-danger mb-3"></div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="StartDate" class="form-label"><i class="bi bi-calendar-event me-1"></i>Start Date</label>
+                        <input asp-for="StartDate" type="date" class="form-control" min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                        <span asp-validation-for="StartDate" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="EndDate" class="form-label"><i class="bi bi-calendar-check me-1"></i>End Date</label>
+                        <input asp-for="EndDate" type="date" class="form-control" min="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" />
+                        <span asp-validation-for="EndDate" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle me-1"></i>Confirm Booking
+                    </button>
+                    <a asp-controller="Vehicles" asp-action="Details" asp-route-id="@Model.VehicleId" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
