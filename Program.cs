@@ -32,10 +32,32 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 var app = builder.Build();
 
+// If the process was started with --migrate, apply migrations and exit (useful for Render jobs)
+if (args.Contains("--migrate"))
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        try
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            db.Database.Migrate();
+            await DbSeeder.SeedAsync(db);
+            logger.LogInformation("Migrations applied (--migrate) and seeding complete. Exiting.");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error applying migrations or seeding database (--migrate).");
+        }
+    }
+
+    return; // exit process after running migrations
+}
+
 // Configure Stripe
 StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
 
-// Apply migrations and seed data
+// Apply migrations and seed data on normal startup (errors are logged but don't stop the app)
 using (var scope = app.Services.CreateScope())
 {
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();

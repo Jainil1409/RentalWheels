@@ -1,0 +1,27 @@
+# Render manifest for vehicle management system mvc
+# NOTE: Do NOT store secrets here. Set the `ConnectionStrings__DefaultConnection` value
+# in the Render dashboard (Environment → Environment Variables / Secrets).
+
+services:
+  - type: web
+    name: vehicle-management-system-mvc
+    env: docker
+    plan: free
+    dockerfilePath: "vehicle management system mvc/Dockerfile"
+    # The app reads ConnectionStrings__DefaultConnection from configuration.
+    envVars:
+      - key: ConnectionStrings__DefaultConnection
+        value: "<SET_IN_RENDER_DASHBOARD>"
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+
+# Job to run migrations during deploy (run this job from the Render dashboard after deploy)
+jobs:
+  - type: run
+    name: migrate-database
+    dockerfilePath: "vehicle management system mvc/Dockerfile"
+    # This command starts the built image with the --migrate flag; it will apply migrations and exit.
+    command: ["dotnet", "vehicle_management_system_mvc.dll", "--migrate"]
+    envVars:
+      - key: ConnectionStrings__DefaultConnection
+        value: "<SET_IN_RENDER_DASHBOARD>"
