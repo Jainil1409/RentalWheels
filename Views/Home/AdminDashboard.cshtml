@@ -3,123 +3,222 @@
     ViewData["Title"] = "Admin Dashboard";
 }
 
-<div class="section-header animate-fade-in-up">
-    <h2><i class="bi bi-speedometer2 me-2 text-gradient"></i>Admin Dashboard</h2>
-    <p>Welcome back! Here's an overview of your vehicle rental system.</p>
-</div>
-
-<div class="row g-4 mb-4">
-    <div class="col-lg-3 col-md-6 scroll-animate">
-        <div class="stat-card primary">
-            <div class="stat-icon"><i class="bi bi-car-front-fill"></i></div>
-            <div class="stat-value" data-count="@Model.TotalVehicles">0</div>
-            <div class="stat-label">Total Vehicles</div>
-            <div class="stat-sub"><i class="bi bi-check-circle me-1"></i>@Model.AvailableVehicles available</div>
+<!-- Dashboard Header Section -->
+<div class="dashboard-header animate-fade-in-up">
+    <div class="header-content">
+        <div>
+            <h1 class="dashboard-title">
+                <i class="bi bi-speedometer2"></i> Dashboard
+            </h1>
+            <p class="dashboard-subtitle">Welcome back! Here's an overview of your vehicle rental system.</p>
         </div>
-    </div>
-    <div class="col-lg-3 col-md-6 scroll-animate">
-        <div class="stat-card success">
-            <div class="stat-icon"><i class="bi bi-people-fill"></i></div>
-            <div class="stat-value" data-count="@Model.TotalCustomers">0</div>
-            <div class="stat-label">Customers</div>
-            <div class="stat-sub">Registered users</div>
-        </div>
-    </div>
-    <div class="col-lg-3 col-md-6 scroll-animate">
-        <div class="stat-card warning">
-            <div class="stat-icon"><i class="bi bi-key-fill"></i></div>
-            <div class="stat-value" data-count="@Model.ActiveRentals">0</div>
-            <div class="stat-label">Active Rentals</div>
-            <div class="stat-sub"><i class="bi bi-hourglass-split me-1"></i>@Model.PendingBookings pending</div>
-        </div>
-    </div>
-    <div class="col-lg-3 col-md-6 scroll-animate">
-        <div class="stat-card info">
-            <div class="stat-icon"><i class="bi bi-cash-stack"></i></div>
-            <div class="stat-value" data-count="@Model.TotalRevenue" data-prefix="₹" data-decimals="2">₹0</div>
-            <div class="stat-label">Revenue</div>
-            <div class="stat-sub">Total collected</div>
+        <div class="header-stats">
+            <span class="stat-badge"><i class="bi bi-calendar3"></i> Today's Summary</span>
         </div>
     </div>
 </div>
 
+<!-- Critical Alerts Section -->
 @if (Model.OverdueRentals > 0)
 {
-    <div class="alert alert-danger animate-fade-in-up mb-4">
-        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-        <strong>@Model.OverdueRentals overdue rental(s)</strong> require immediate attention.
+    <div class="alert alert-danger alert-dismissible fade show animate-fade-in-up mb-4" role="alert">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-exclamation-triangle-fill me-3" style="font-size: 1.5rem;"></i>
+            <div>
+                <strong>@Model.OverdueRentals overdue rental(s) detected</strong>
+                <br>
+                <small>Immediate action required. Please review and manage these rentals.</small>
+            </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 }
 
-<div class="row g-4">
-    <div class="col-lg-6 scroll-animate">
-        <div class="quick-action-card">
-            <div class="card-header">
-                <i class="bi bi-lightning-fill me-2"></i>Quick Actions
-            </div>
-            <a asp-controller="Vehicles" asp-action="Create" class="quick-action-item">
-                <div class="action-icon primary"><i class="bi bi-plus-circle-fill"></i></div>
-                <div>
-                    <strong>Add New Vehicle</strong>
-                    <small class="d-block text-muted">Register a new vehicle to the fleet</small>
-                </div>
-            </a>
-            <a asp-controller="Bookings" asp-action="AllBookings" class="quick-action-item">
-                <div class="action-icon warning"><i class="bi bi-journal-text"></i></div>
-                <div>
-                    <strong>Manage Bookings</strong>
-                    <small class="d-block text-muted">Approve, reject, or complete bookings</small>
-                </div>
-            </a>
-            <a asp-controller="Payments" asp-action="Index" class="quick-action-item">
-                <div class="action-icon success"><i class="bi bi-credit-card-2-front"></i></div>
-                <div>
-                    <strong>View Payments</strong>
-                    <small class="d-block text-muted">Track all payment transactions</small>
-                </div>
-            </a>
-            <a asp-controller="Vehicles" asp-action="Index" class="quick-action-item">
-                <div class="action-icon info"><i class="bi bi-car-front"></i></div>
-                <div>
-                    <strong>Vehicle Fleet</strong>
-                    <small class="d-block text-muted">Browse and manage all vehicles</small>
-                </div>
-            </a>
-        </div>
+<!-- Key Metrics Cards -->
+<div class="metrics-section mb-5">
+    <div class="section-title mb-4">
+        <h3><i class="bi bi-graph-up"></i> Key Metrics</h3>
+        <p>Real-time business overview</p>
     </div>
-    <div class="col-lg-6 scroll-animate">
-        <div class="quick-action-card">
-            <div class="card-header">
-                <i class="bi bi-bar-chart-fill me-2"></i>Reports
+    
+    <div class="row g-4">
+        <!-- Total Vehicles -->
+        <div class="col-lg-3 col-md-6">
+            <div class="metric-card primary scroll-animate">
+                <div class="metric-header">
+                    <div class="metric-icon">
+                        <i class="bi bi-car-front-fill"></i>
+                    </div>
+                    <div class="metric-badge">+2.5%</div>
+                </div>
+                <div class="metric-body">
+                    <div class="metric-value" data-count="@Model.TotalVehicles">0</div>
+                    <div class="metric-label">Total Vehicles</div>
+                    <div class="metric-detail">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>@Model.AvailableVehicles available</span>
+                    </div>
+                </div>
             </div>
-            <a asp-controller="Reports" asp-action="Index" class="quick-action-item">
-                <div class="action-icon primary"><i class="bi bi-graph-up-arrow"></i></div>
-                <div>
-                    <strong>Reports Dashboard</strong>
-                    <small class="d-block text-muted">Overview of all key metrics</small>
+        </div>
+
+        <!-- Total Customers -->
+        <div class="col-lg-3 col-md-6">
+            <div class="metric-card success scroll-animate">
+                <div class="metric-header">
+                    <div class="metric-icon">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <div class="metric-badge">+5%</div>
                 </div>
-            </a>
-            <a asp-controller="Reports" asp-action="VehicleUsage" class="quick-action-item">
-                <div class="action-icon info"><i class="bi bi-speedometer2"></i></div>
-                <div>
-                    <strong>Vehicle Usage Report</strong>
-                    <small class="d-block text-muted">See which vehicles are most popular</small>
+                <div class="metric-body">
+                    <div class="metric-value" data-count="@Model.TotalCustomers">0</div>
+                    <div class="metric-label">Total Customers</div>
+                    <div class="metric-detail">
+                        <i class="bi bi-person-check"></i>
+                        <span>Active members</span>
+                    </div>
                 </div>
-            </a>
-            <a asp-controller="Reports" asp-action="RentalHistory" class="quick-action-item">
-                <div class="action-icon warning"><i class="bi bi-clock-history"></i></div>
-                <div>
-                    <strong>Rental History</strong>
-                    <small class="d-block text-muted">Complete rental transaction records</small>
+            </div>
+        </div>
+
+        <!-- Active Rentals -->
+        <div class="col-lg-3 col-md-6">
+            <div class="metric-card warning scroll-animate">
+                <div class="metric-header">
+                    <div class="metric-icon">
+                        <i class="bi bi-key-fill"></i>
+                    </div>
+                    <div class="metric-badge">-1.2%</div>
                 </div>
-            </a>
-            <a asp-controller="Reports" asp-action="PaymentReport" class="quick-action-item">
-                <div class="action-icon success"><i class="bi bi-cash-coin"></i></div>
-                <div>
-                    <strong>Payment Report</strong>
-                    <small class="d-block text-muted">Financial summary and analysis</small>
+                <div class="metric-body">
+                    <div class="metric-value" data-count="@Model.ActiveRentals">0</div>
+                    <div class="metric-label">Active Rentals</div>
+                    <div class="metric-detail">
+                        <i class="bi bi-info-circle"></i>
+                        <span>@Model.PendingBookings pending approval</span>
+                    </div>
                 </div>
-            </a>
+            </div>
+        </div>
+
+        <!-- Total Revenue -->
+        <div class="col-lg-3 col-md-6">
+            <div class="metric-card info scroll-animate">
+                <div class="metric-header">
+                    <div class="metric-icon">
+                        <i class="bi bi-currency-rupee"></i>
+                    </div>
+                    <div class="metric-badge">+8.2%</div>
+                </div>
+                <div class="metric-body">
+                    <div class="metric-value" data-prefix="₹" data-count="@Model.TotalRevenue">₹0</div>
+                    <div class="metric-label">Total Revenue</div>
+                    <div class="metric-detail">
+                        <i class="bi bi-trending-up"></i>
+                        <span>This month</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<!-- Quick Actions & Reports Section -->
+<div class="row g-4 mb-4">
+    <!-- Quick Actions -->
+    <div class="col-lg-6 scroll-animate">
+        <div class="dashboard-section">
+            <div class="section-header-bar">
+                <div>
+                    <i class="bi bi-lightning-charge-fill"></i>
+                    <h4>Quick Actions</h4>
+                </div>
+                <span class="badge bg-primary">4 Actions</span>
+            </div>
+            <div class="actions-grid">
+                <a asp-controller="Vehicles" asp-action="Create" class="action-card action-card-primary">
+                    <div class="action-card-icon"><i class="bi bi-plus-circle-fill"></i></div>
+                    <div class="action-card-content">
+                        <h5>Add New Vehicle</h5>
+                        <p>Register a new vehicle to the fleet</p>
+                    </div>
+                    <div class="action-card-arrow"><i class="bi bi-arrow-right"></i></div>
+                </a>
+                <a asp-controller="Bookings" asp-action="AllBookings" class="action-card action-card-warning">
+                    <div class="action-card-icon"><i class="bi bi-calendar2-check"></i></div>
+                    <div class="action-card-content">
+                        <h5>Manage Bookings</h5>
+                        <p>Approve, reject, or complete bookings</p>
+                    </div>
+                    <div class="action-card-arrow"><i class="bi bi-arrow-right"></i></div>
+                </a>
+                <a asp-controller="Payments" asp-action="Index" class="action-card action-card-success">
+                    <div class="action-card-icon"><i class="bi bi-credit-card-2-front-fill"></i></div>
+                    <div class="action-card-content">
+                        <h5>View Payments</h5>
+                        <p>Track all payment transactions</p>
+                    </div>
+                    <div class="action-card-arrow"><i class="bi bi-arrow-right"></i></div>
+                </a>
+                <a asp-controller="Vehicles" asp-action="Index" class="action-card action-card-info">
+                    <div class="action-card-icon"><i class="bi bi-car-front-fill"></i></div>
+                    <div class="action-card-content">
+                        <h5>Vehicle Fleet</h5>
+                        <p>Browse and manage all vehicles</p>
+                    </div>
+                    <div class="action-card-arrow"><i class="bi bi-arrow-right"></i></div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reports Section -->
+    <div class="col-lg-6 scroll-animate">
+        <div class="dashboard-section">
+            <div class="section-header-bar">
+                <div>
+                    <i class="bi bi-bar-chart-fill"></i>
+                    <h4>Reports & Analytics</h4>
+                </div>
+                <span class="badge bg-info">4 Reports</span>
+            </div>
+            <div class="actions-grid">
+                <a asp-controller="Reports" asp-action="Index" class="action-card action-card-primary">
+                    <div class="action-card-icon"><i class="bi bi-graph-up-arrow"></i></div>
+                    <div class="action-card-content">
+                        <h5>Reports Dashboard</h5>
+                        <p>Overview of all key metrics</p>
+                    </div>
+                    <div class="action-card-arrow"><i class="bi bi-arrow-right"></i></div>
+                </a>
+                <a asp-controller="Reports" asp-action="VehicleUsage" class="action-card action-card-success">
+                    <div class="action-card-icon"><i class="bi bi-speedometer2"></i></div>
+                    <div class="action-card-content">
+                        <h5>Vehicle Usage Report</h5>
+                        <p>See which vehicles are most popular</p>
+                    </div>
+                    <div class="action-card-arrow"><i class="bi bi-arrow-right"></i></div>
+                </a>
+                <a asp-controller="Reports" asp-action="RentalHistory" class="action-card action-card-warning">
+                    <div class="action-card-icon"><i class="bi bi-clock-history"></i></div>
+                    <div class="action-card-content">
+                        <h5>Rental History</h5>
+                        <p>Complete rental transaction records</p>
+                    </div>
+                    <div class="action-card-arrow"><i class="bi bi-arrow-right"></i></div>
+                </a>
+                <a asp-controller="Reports" asp-action="PaymentReport" class="action-card action-card-info">
+                    <div class="action-card-icon"><i class="bi bi-cash-coin"></i></div>
+                    <div class="action-card-content">
+                        <h5>Payment Report</h5>
+                        <p>Financial summary and analysis</p>
+                    </div>
+                    <div class="action-card-arrow"><i class="bi bi-arrow-right"></i></div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/js/dashboard.js"></script>

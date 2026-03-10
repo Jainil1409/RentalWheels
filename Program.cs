@@ -1,10 +1,16 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Stripe;
+using System.Globalization;
 using vehicle_management_system_mvc.Data;
 using vehicle_management_system_mvc.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Set Indian locale for currency formatting (₹1,00,000.00)
+var indianCulture = new CultureInfo("en-IN");
+CultureInfo.DefaultThreadCurrentCulture = indianCulture;
+CultureInfo.DefaultThreadCurrentUICulture = indianCulture;
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -13,6 +19,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddHttpClient<UnsplashService>();
+
+builder.Services.AddScoped<EmailService>();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>

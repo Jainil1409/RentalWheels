@@ -30,6 +30,19 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Format number with Indian comma notation (e.g. 1,00,000.00)
+    function formatIndian(num, decimals) {
+        var parts = num.toFixed(decimals).split('.');
+        var intPart = parts[0];
+        var lastThree = intPart.slice(-3);
+        var rest = intPart.slice(0, -3);
+        if (rest.length > 0) {
+            lastThree = ',' + lastThree;
+        }
+        var formatted = rest.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + lastThree;
+        return decimals > 0 ? formatted + '.' + parts[1] : formatted;
+    }
+
     // Counter animation for dashboard stat values
     const counters = document.querySelectorAll('[data-count]');
     counters.forEach(function (counter) {
@@ -45,7 +58,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const progress = Math.min(elapsed / duration, 1);
             const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
             const current = target * eased;
-            counter.textContent = prefix + current.toFixed(decimals) + suffix;
+            counter.textContent = prefix + formatIndian(current, decimals) + suffix;
             if (progress < 1) {
                 requestAnimationFrame(updateCounter);
             }
@@ -116,4 +129,43 @@ document.addEventListener('DOMContentLoaded', function () {
             parent.replaceChild(placeholder, img);
         });
     });
+
+    // === Admin Sidebar Logic ===
+    const sidebar = document.getElementById('adminSidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarClose = document.getElementById('sidebarClose');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+    if (sidebar) {
+        // Mobile toggle
+        if (sidebarToggle) {
+            sidebarToggle.addEventListener('click', function () {
+                sidebar.classList.add('show');
+                if (sidebarOverlay) sidebarOverlay.classList.add('show');
+            });
+        }
+
+        // Close sidebar
+        function closeSidebar() {
+            sidebar.classList.remove('show');
+            if (sidebarOverlay) sidebarOverlay.classList.remove('show');
+        }
+
+        if (sidebarClose) sidebarClose.addEventListener('click', closeSidebar);
+        if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
+
+        // Restore sidebar scroll position from sessionStorage
+        var sidebarNav = sidebar.querySelector('.sidebar-nav');
+        if (sidebarNav) {
+            var savedScroll = sessionStorage.getItem('sidebarScrollPos');
+            if (savedScroll !== null) {
+                sidebarNav.scrollTop = parseInt(savedScroll, 10);
+            }
+
+            // Save sidebar scroll position before navigating away
+            window.addEventListener('beforeunload', function () {
+                sessionStorage.setItem('sidebarScrollPos', sidebarNav.scrollTop);
+            });
+        }
+    }
 });

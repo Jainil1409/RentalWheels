@@ -57,7 +57,7 @@ namespace vehicle_management_system_mvc.Migrations
 
                     b.HasIndex("VehicleId");
 
-                    b.ToTable("Bookings");
+                    b.ToTable("Bookings", (string)null);
                 });
 
             modelBuilder.Entity("vehicle_management_system_mvc.Models.Payment", b =>
@@ -96,7 +96,7 @@ namespace vehicle_management_system_mvc.Migrations
                     b.HasIndex("BookingId")
                         .IsUnique();
 
-                    b.ToTable("Payments");
+                    b.ToTable("Payments", (string)null);
                 });
 
             modelBuilder.Entity("vehicle_management_system_mvc.Models.User", b =>
@@ -137,7 +137,7 @@ namespace vehicle_management_system_mvc.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("vehicle_management_system_mvc.Models.Vehicle", b =>
@@ -187,7 +187,7 @@ namespace vehicle_management_system_mvc.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Vehicles");
+                    b.ToTable("Vehicles", (string)null);
                 });
 
             modelBuilder.Entity("vehicle_management_system_mvc.Models.Booking", b =>

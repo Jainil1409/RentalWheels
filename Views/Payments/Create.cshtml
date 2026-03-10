@@ -61,22 +61,21 @@
                 <div asp-validation-summary="All" class="text-danger mb-3"></div>
 
                 <div class="mb-4">
+                    <input type="hidden" name="Method" id="methodValue" value="Cash" />
                     <div class="row g-3">
                         <div class="col-6">
-                            <input type="radio" class="btn-check" name="Method" id="methodCash" value="Cash" checked autocomplete="off" />
-                            <label class="btn btn-outline-success w-100 py-3" for="methodCash" id="cashBtnLabel">
-                                <i class="bi bi-cash-stack d-block mb-1" style="font-size:1.5rem;"></i>
-                                <strong>Cash</strong>
-                                <small class="d-block" style="opacity:0.7;">Pay at counter</small>
-                            </label>
+                            <div class="payment-method-card cash-card selected" id="cashCard">
+                                <span class="method-icon"><i class="bi bi-cash-stack"></i></span>
+                                <span class="method-name">Cash</span>
+                                <span class="method-desc">Pay at counter</span>
+                            </div>
                         </div>
                         <div class="col-6">
-                            <input type="radio" class="btn-check" name="Method" id="methodStripe" value="Stripe" autocomplete="off" />
-                            <label class="btn btn-outline-primary w-100 py-3" for="methodStripe" id="stripeBtnLabel">
-                                <i class="bi bi-stripe d-block mb-1" style="font-size:1.5rem;"></i>
-                                <strong>Stripe</strong>
-                                <small class="d-block" style="opacity:0.7;">Card payment</small>
-                            </label>
+                            <div class="payment-method-card stripe-card" id="stripeCard">
+                                <span class="method-icon"><i class="bi bi-stripe"></i></span>
+                                <span class="method-name">Stripe</span>
+                                <span class="method-desc">Card payment</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -108,19 +107,25 @@
     <partial name="_ValidationScriptsPartial" />
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const cashRadio = document.getElementById('methodCash');
-            const stripeRadio = document.getElementById('methodStripe');
+            const cashCard = document.getElementById('cashCard');
+            const stripeCard = document.getElementById('stripeCard');
+            const methodInput = document.getElementById('methodValue');
             const cashInfo = document.getElementById('cashInfo');
             const stripeInfo = document.getElementById('stripeInfo');
             const payBtn = document.getElementById('payBtn');
 
-            function updateUI() {
-                if (stripeRadio.checked) {
+            function selectMethod(method) {
+                methodInput.value = method;
+                if (method === 'Stripe') {
+                    stripeCard.classList.add('selected');
+                    cashCard.classList.remove('selected');
                     cashInfo.style.display = 'none';
                     stripeInfo.style.display = 'block';
                     payBtn.className = 'btn btn-primary flex-fill';
                     payBtn.innerHTML = '<i class="bi bi-stripe me-1"></i>Pay with Stripe';
                 } else {
+                    cashCard.classList.add('selected');
+                    stripeCard.classList.remove('selected');
                     cashInfo.style.display = 'block';
                     stripeInfo.style.display = 'none';
                     payBtn.className = 'btn btn-success flex-fill';
@@ -128,8 +133,8 @@
                 }
             }
 
-            cashRadio.addEventListener('change', updateUI);
-            stripeRadio.addEventListener('change', updateUI);
+            cashCard.addEventListener('click', function () { selectMethod('Cash'); });
+            stripeCard.addEventListener('click', function () { selectMethod('Stripe'); });
         });
     </script>
 }

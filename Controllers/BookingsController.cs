@@ -82,7 +82,7 @@ namespace vehicle_management_system_mvc.Controllers
             _context.Bookings.Add(booking);
             await _context.SaveChangesAsync();
 
-            TempData["Success"] = $"Booking created! Total cost: ₹{totalCost:F2} for {days} day(s).";
+            TempData["Success"] = $"Booking created! Total cost: ₹{totalCost:N2} for {days} day(s).";
             return RedirectToAction(nameof(MyBookings));
         }
 

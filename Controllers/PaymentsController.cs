@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Stripe.Checkout;
 using vehicle_management_system_mvc.Data;
 using vehicle_management_system_mvc.Models;
+using vehicle_management_system_mvc.Services;
 using vehicle_management_system_mvc.ViewModels;
 
 namespace vehicle_management_system_mvc.Controllers
@@ -14,14 +15,46 @@ namespace vehicle_management_system_mvc.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IConfiguration _configuration;
+        private readonly EmailService _emailService;
 
-        public PaymentsController(ApplicationDbContext context, IConfiguration configuration)
+        public PaymentsController(ApplicationDbContext context, IConfiguration configuration, EmailService emailService)
         {
             _context = context;
             _configuration = configuration;
+            _emailService = emailService;
         }
 
         private int GetUserId() => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+        private async Task SendInvoiceEmailAsync(Booking booking, Payment payment)
+        {
+            try
+            {
+                var customer = await _context.Users.FindAsync(booking.CustomerId);
+                if (customer == null) return;
+
+                var days = (booking.EndDate - booking.StartDate).Days;
+                var vehicle = booking.Vehicle;
+
+                await _emailService.SendInvoiceEmailAsync(
+                    toEmail: customer.Email,
+                    customerName: customer.FullName,
+                    invoiceNumber: payment.InvoiceNumber ?? "N/A",
+                    vehicleName: $"{vehicle.Brand} {vehicle.Model}",
+                    vehicleDetails: $"{vehicle.Type} • {vehicle.Year} • {vehicle.LicensePlate}",
+                    rentalPeriod: $"{booking.StartDate:MMM dd, yyyy} — {booking.EndDate:MMM dd, yyyy}",
+                    days: days,
+                    ratePerDay: vehicle.PricePerDay,
+                    totalAmount: payment.Amount,
+                    paymentMethod: payment.Method.ToString(),
+                    paymentDate: payment.PaymentDate,
+                    stripeRef: payment.StripePaymentIntentId);
+            }
+            catch
+            {
+                // Email failure should not block the payment flow
+            }
+        }
 
         private string GenerateInvoiceNumber()
         {
@@ -98,7 +131,10 @@ namespace vehicle_management_system_mvc.Controllers
                 _context.Payments.Add(payment);
                 await _context.SaveChangesAsync();
 
-                TempData["Success"] = $"Cash payment of ₹{booking.TotalCost:F2} completed successfully.";
+                // Send invoice email
+                await SendInvoiceEmailAsync(booking, payment);
+
+                TempData["Success"] = $"Cash payment of ₹{booking.TotalCost:N2} completed successfully.";
                 return RedirectToAction("Invoice", new { paymentId = payment.Id });
             }
 
@@ -180,7 +216,10 @@ namespace vehicle_management_system_mvc.Controllers
             _context.Payments.Add(payment);
             await _context.SaveChangesAsync();
 
-            TempData["Success"] = $"Stripe payment of ₹{booking.TotalCost:F2} completed successfully.";
+            // Send invoice email
+            await SendInvoiceEmailAsync(booking, payment);
+
+            TempData["Success"] = $"Stripe payment of ₹{booking.TotalCost:N2} completed successfully.";
             return RedirectToAction("Invoice", new { paymentId = payment.Id });
         }
 

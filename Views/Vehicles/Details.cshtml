@@ -1,6 +1,42 @@
 @model Vehicle
 @{
     ViewData["Title"] = $"{Model.Brand} {Model.Model}";
+
+    // Auto-generate feature highlights based on vehicle type + price
+    var highlights = new List<(string Icon, string Label)>();
+    switch (Model.Type)
+    {
+        case VehicleType.Luxury:
+            highlights.AddRange(new[] { ("bi-shield-check", "Airbags"), ("bi-geo-alt-fill", "GPS Navigation"), ("bi-phone", "Apple CarPlay"), ("bi-star-fill", "Leather Interior"), ("bi-brightness-high", "Sunroof"), ("bi-gear-wide-connected", "Automatic") });
+            break;
+        case VehicleType.SUV:
+            highlights.AddRange(new[] { ("bi-shield-check", "Airbags"), ("bi-geo-alt-fill", "GPS Navigation"), ("bi-camera-video-fill", "Backup Camera"), ("bi-speedometer2", "Cruise Control"), ("bi-gear-wide-connected", "Automatic"), ("bi-ev-front-fill", "AWD") });
+            break;
+        case VehicleType.Sedan:
+            highlights.AddRange(new[] { ("bi-shield-check", "Airbags"), ("bi-bluetooth", "Bluetooth"), ("bi-phone", "Apple CarPlay"), ("bi-fuel-pump", "Fuel Efficient"), ("bi-gear-wide-connected", "Automatic"), ("bi-camera-video-fill", "Backup Camera") });
+            break;
+        case VehicleType.Convertible:
+            highlights.AddRange(new[] { ("bi-shield-check", "Airbags"), ("bi-geo-alt-fill", "GPS Navigation"), ("bi-star-fill", "Leather Interior"), ("bi-speedometer2", "Sport Mode"), ("bi-gear-wide-connected", "Automatic"), ("bi-music-note-beamed", "Premium Audio") });
+            break;
+        case VehicleType.Truck:
+            highlights.AddRange(new[] { ("bi-shield-check", "Airbags"), ("bi-camera-video-fill", "Backup Camera"), ("bi-ev-front-fill", "4WD"), ("bi-truck", "Tow Package"), ("bi-bluetooth", "Bluetooth"), ("bi-gear-wide-connected", "Automatic") });
+            break;
+        case VehicleType.Hatchback:
+            highlights.AddRange(new[] { ("bi-shield-check", "Airbags"), ("bi-bluetooth", "Bluetooth"), ("bi-fuel-pump", "Fuel Efficient"), ("bi-phone-fill", "Android Auto"), ("bi-key-fill", "Keyless Entry"), ("bi-gear-wide-connected", "Automatic") });
+            break;
+        default:
+            highlights.AddRange(new[] { ("bi-shield-check", "Airbags"), ("bi-bluetooth", "Bluetooth"), ("bi-geo-alt-fill", "GPS Navigation"), ("bi-gear-wide-connected", "Automatic"), ("bi-camera-video-fill", "Backup Camera"), ("bi-key-fill", "Keyless Entry") });
+            break;
+    }
+    if (Model.PricePerDay >= 20000) { highlights.Add(("bi-thermometer-sun", "Heated Seats")); highlights.Add(("bi-eye-fill", "Blind Spot Monitor")); }
+
+    // Rental perks
+    var perks = new[] {
+        ("bi-shield-lock-fill", "Fully Insured", "Comprehensive coverage included"),
+        ("bi-tools", "24/7 Roadside Assist", "Emergency help anytime"),
+        ("bi-arrow-repeat", "Free Cancellation", "Up to 24 hours before pickup"),
+        ("bi-speedometer", "Unlimited Mileage", "No extra charges per km")
+    };
 }
 
 <nav aria-label="breadcrumb" class="animate-fade-in-down">
@@ -11,82 +47,199 @@
     </ol>
 </nav>
 
-<div class="row g-4">
-    <div class="col-lg-7 animate-fade-in-left">
-        <div class="detail-img-container">
-            @if (!string.IsNullOrEmpty(Model.ImageUrl))
-            {
-                <img src="@Model.ImageUrl" alt="@Model.Brand @Model.Model" />
-            }
-            else
-            {
-                <div class="detail-img-placeholder vehicle-img-placeholder @Model.Type.ToString().ToLower()" style="height:350px;border-radius:var(--radius-lg);">
-                    <i class="bi bi-car-front-fill"></i>
-                </div>
-            }
-        </div>
-    </div>
-    <div class="col-lg-5 animate-fade-in-right">
-        <div class="detail-info-card">
-            <div class="d-flex justify-content-between align-items-start mb-3">
-                <div>
-                    <span class="badge bg-primary mb-2">@Model.Type</span>
-                    <h2 class="mb-0">@Model.Brand @Model.Model</h2>
-                </div>
+<!-- Hero Image Section -->
+<div class="vd-hero animate-fade-in-up">
+    <div class="vd-hero-img">
+        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+        {
+            <img src="@Model.ImageUrl" alt="@Model.Brand @Model.Model" />
+        }
+        else
+        {
+            <div class="detail-img-placeholder vehicle-img-placeholder @Model.Type.ToString().ToLower()" style="height:100%;border-radius:0;">
+                <i class="bi bi-car-front-fill"></i>
+            </div>
+        }
+        <div class="vd-hero-overlay">
+            <div class="vd-hero-badges">
+                <span class="vd-type-badge">@Model.Type</span>
                 @if (Model.IsAvailable)
                 {
-                    <span class="badge bg-success fs-6"><i class="bi bi-check-circle me-1"></i>Available</span>
+                    <span class="vd-status-badge available"><i class="bi bi-check-circle-fill me-1"></i>Available</span>
                 }
                 else
                 {
-                    <span class="badge bg-danger fs-6"><i class="bi bi-x-circle me-1"></i>Unavailable</span>
+                    <span class="vd-status-badge unavailable"><i class="bi bi-x-circle-fill me-1"></i>Unavailable</span>
                 }
             </div>
+            <div class="vd-hero-title">
+                <h1>@Model.Brand @Model.Model</h1>
+                <span class="vd-hero-year"><i class="bi bi-calendar3 me-1"></i>@Model.Year</span>
+            </div>
+        </div>
+    </div>
+</div>
 
-            <div class="info-row">
-                <span class="info-label"><i class="bi bi-calendar3 me-2"></i>Year</span>
-                <span class="info-value">@Model.Year</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label"><i class="bi bi-grid me-2"></i>Type</span>
-                <span class="info-value">@Model.Type</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label"><i class="bi bi-card-text me-2"></i>License Plate</span>
-                <span class="info-value">@(Model.LicensePlate ?? "N/A")</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label"><i class="bi bi-cash-stack me-2"></i>Price Per Day</span>
-                <span class="info-value" style="font-family:'Poppins',sans-serif;font-size:1.4rem;font-weight:700;color:var(--primary);">₹@Model.PricePerDay.ToString("N2")</span>
-            </div>
+<div class="row g-4 mt-1">
+    <!-- Left Column: Details -->
+    <div class="col-lg-8 animate-fade-in-left">
 
+        <!-- Quick Specs Bar -->
+        <div class="vd-specs-bar">
+            <div class="vd-spec-item">
+                <i class="bi bi-car-front-fill"></i>
+                <div>
+                    <span class="vd-spec-label">Type</span>
+                    <strong>@Model.Type</strong>
+                </div>
+            </div>
+            <div class="vd-spec-item">
+                <i class="bi bi-calendar3"></i>
+                <div>
+                    <span class="vd-spec-label">Year</span>
+                    <strong>@Model.Year</strong>
+                </div>
+            </div>
+            <div class="vd-spec-item">
+                <i class="bi bi-card-text"></i>
+                <div>
+                    <span class="vd-spec-label">License</span>
+                    <strong>@(Model.LicensePlate ?? "N/A")</strong>
+                </div>
+            </div>
+            <div class="vd-spec-item">
+                <i class="bi bi-gear-wide-connected"></i>
+                <div>
+                    <span class="vd-spec-label">Transmission</span>
+                    <strong>Automatic</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- About This Vehicle -->
+        <div class="vd-section">
+            <h5 class="vd-section-title"><i class="bi bi-info-circle-fill me-2"></i>About This Vehicle</h5>
             @if (!string.IsNullOrEmpty(Model.Description))
             {
-                <div class="mt-3 pt-3" style="border-top:1px solid var(--gray-100);">
-                    <h6 class="text-muted mb-2"><i class="bi bi-text-paragraph me-1"></i>Description</h6>
-                    <p class="mb-0" style="color:var(--gray-600);line-height:1.7;">@Model.Description</p>
-                </div>
+                <p class="vd-description">@Model.Description</p>
             }
+            else
+            {
+                <p class="vd-description">
+                    The @Model.Year @Model.Brand @Model.Model is a premium @Model.Type.ToString().ToLower() designed for comfort and performance.
+                    Ideal for both city commutes and long road trips, this vehicle offers a perfect blend of style, safety, and reliability.
+                </p>
+            }
+            <p class="vd-description-sub">
+                This vehicle is part of our curated rental fleet, maintained to the highest standards.
+                Every rental includes thorough inspection and sanitization before handover.
+            </p>
+        </div>
 
-            <div class="d-flex gap-2 mt-4">
+        <!-- Feature Highlights -->
+        <div class="vd-section">
+            <h5 class="vd-section-title"><i class="bi bi-star-fill me-2"></i>Feature Highlights</h5>
+            <div class="vd-features-grid">
+                @foreach (var h in highlights)
+                {
+                    <div class="vd-feature-item">
+                        <div class="vd-feature-icon"><i class="bi @h.Icon"></i></div>
+                        <span>@h.Label</span>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Rental Perks -->
+        <div class="vd-section">
+            <h5 class="vd-section-title"><i class="bi bi-gift-fill me-2"></i>What's Included</h5>
+            <div class="vd-perks-grid">
+                @foreach (var perk in perks)
+                {
+                    <div class="vd-perk-card">
+                        <div class="vd-perk-icon"><i class="bi @perk.Item1"></i></div>
+                        <div>
+                            <strong>@perk.Item2</strong>
+                            <small>@perk.Item3</small>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Pricing & Actions -->
+    <div class="col-lg-4 animate-fade-in-right">
+        <!-- Pricing Card -->
+        <div class="vd-pricing-card">
+            <div class="vd-pricing-header">
+                <span class="vd-pricing-label">Price Per Day</span>
+                <div class="vd-pricing-amount">₹@Model.PricePerDay.ToString("N2")</div>
+                <span class="vd-pricing-sub">Inclusive of all taxes</span>
+            </div>
+
+            <div class="vd-pricing-body">
+                <div class="vd-pricing-row">
+                    <span><i class="bi bi-clock me-2"></i>Min. Rental</span>
+                    <strong>1 Day</strong>
+                </div>
+                <div class="vd-pricing-row">
+                    <span><i class="bi bi-geo-alt me-2"></i>Pickup</span>
+                    <strong>In-Store</strong>
+                </div>
+                <div class="vd-pricing-row">
+                    <span><i class="bi bi-fuel-pump me-2"></i>Fuel Policy</span>
+                    <strong>Full-to-Full</strong>
+                </div>
+                <div class="vd-pricing-row">
+                    <span><i class="bi bi-person-check me-2"></i>Security Deposit</span>
+                    <strong>₹@((Model.PricePerDay * 2).ToString("N0"))</strong>
+                </div>
+            </div>
+
+            <div class="vd-pricing-actions">
                 @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Customer") && Model.IsAvailable)
                 {
-                    <a asp-controller="Bookings" asp-action="Create" asp-route-vehicleId="@Model.Id" class="btn btn-primary flex-fill">
+                    <a asp-controller="Bookings" asp-action="Create" asp-route-vehicleId="@Model.Id" class="btn btn-primary w-100 btn-lg">
                         <i class="bi bi-calendar-plus me-1"></i>Book Now
                     </a>
                 }
+                else if (!Model.IsAvailable)
+                {
+                    <button class="btn btn-secondary w-100 btn-lg" disabled>
+                        <i class="bi bi-x-circle me-1"></i>Currently Unavailable
+                    </button>
+                }
                 @if (User.IsInRole("Admin"))
                 {
-                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
-                        <i class="bi bi-pencil me-1"></i>Edit
-                    </a>
-                    <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">
-                        <i class="bi bi-trash me-1"></i>Delete
-                    </a>
+                    <div class="d-flex gap-2 mt-2">
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning flex-fill">
+                            <i class="bi bi-pencil me-1"></i>Edit
+                        </a>
+                        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger flex-fill">
+                            <i class="bi bi-trash me-1"></i>Delete
+                        </a>
+                    </div>
                 }
-                <a asp-action="Index" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left me-1"></i>Back
+                <a asp-action="Index" class="btn btn-outline-secondary w-100 mt-2">
+                    <i class="bi bi-arrow-left me-1"></i>Back to Fleet
                 </a>
+            </div>
+        </div>
+
+        <!-- Quick Info Card -->
+        <div class="vd-quick-info mt-3">
+            <div class="vd-qi-item">
+                <i class="bi bi-patch-check-fill text-success"></i>
+                <span>Verified & Inspected</span>
+            </div>
+            <div class="vd-qi-item">
+                <i class="bi bi-shield-fill-check text-primary"></i>
+                <span>Insurance Included</span>
+            </div>
+            <div class="vd-qi-item">
+                <i class="bi bi-headset text-info"></i>
+                <span>24/7 Customer Support</span>
             </div>
         </div>
     </div>

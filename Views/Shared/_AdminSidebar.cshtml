@@ -1,0 +1,100 @@
+@* Admin Sidebar - Modern Professional Design *@
+
+<aside class="admin-sidebar" id="adminSidebar">
+    <!-- Sidebar Header -->
+    <div class="sidebar-header">
+        <div class="sidebar-brand">
+            @* <img src="~/images/logo.png" alt="RentWheels" class="sidebar-logo" /> *@
+            <span class="sidebar-brand-text">RentWheels</span>
+        </div>
+        <button class="sidebar-toggle-btn d-lg-none" id="sidebarClose" aria-label="Close sidebar">
+            <i class="bi bi-x-lg"></i>
+        </button>
+    </div>
+
+    <!-- Admin Profile -->
+    <div class="sidebar-profile">
+        <div class="profile-avatar">
+            @(User.Identity?.Name?.Substring(0, 1).ToUpper())
+        </div>
+        <div class="profile-info">
+            <span class="profile-name">@User.Identity?.Name</span>
+            <span class="profile-role">System Admin</span>
+        </div>
+    </div>
+
+    @{ var currentPath = Context.Request.Path.Value?.ToLower() ?? ""; }
+    <!-- Navigation -->
+    <nav class="sidebar-nav">
+        <!-- Main -->
+        <div class="nav-section">
+            <span class="nav-section-title">Main</span>
+            <a asp-controller="Home" asp-action="Index" class="sidebar-link @(currentPath == "/" || currentPath == "/home" || currentPath == "/home/index" ? "active" : "")">
+                <i class="bi bi-speedometer2"></i>
+                <span>Dashboard</span>
+            </a>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="nav-section">
+            <span class="nav-section-title">Quick Actions</span>
+            <a asp-controller="Vehicles" asp-action="Create" class="sidebar-link @(currentPath == "/vehicles/create" ? "active" : "")">
+                <i class="bi bi-plus-circle-fill"></i>
+                <span>Add New Vehicle</span>
+                <small class="sidebar-link-badge">New</small>
+            </a>
+            <a asp-controller="Bookings" asp-action="AllBookings" class="sidebar-link @(currentPath == "/bookings/allbookings" ? "active" : "")">
+                <i class="bi bi-calendar2-check"></i>
+                <span>Manage Bookings</span>
+            </a>
+            <a asp-controller="Payments" asp-action="Index" class="sidebar-link @(currentPath == "/payments" || currentPath == "/payments/index" ? "active" : "")">
+                <i class="bi bi-credit-card-2-front"></i>
+                <span>View Payments</span>
+            </a>
+            <a asp-controller="Vehicles" asp-action="Index" class="sidebar-link @(currentPath == "/vehicles" || currentPath == "/vehicles/index" ? "active" : "")">
+                <i class="bi bi-car-front-fill"></i>
+                <span>Vehicle Fleet</span>
+            </a>
+        </div>
+
+        <!-- Reports -->
+        <div class="nav-section">
+            <span class="nav-section-title">Reports & Analytics</span>
+            <a asp-controller="Reports" asp-action="Index" class="sidebar-link @(currentPath == "/reports" || currentPath == "/reports/index" ? "active" : "")">
+                <i class="bi bi-graph-up-arrow"></i>
+                <span>Reports Dashboard</span>
+            </a>
+            <a asp-controller="Reports" asp-action="VehicleUsage" class="sidebar-link @(currentPath == "/reports/vehicleusage" ? "active" : "")">
+                <i class="bi bi-speedometer"></i>
+                <span>Vehicle Usage</span>
+            </a>
+            <a asp-controller="Reports" asp-action="RentalHistory" class="sidebar-link @(currentPath == "/reports/rentalhistory" ? "active" : "")">
+                <i class="bi bi-clock-history"></i>
+                <span>Rental History</span>
+            </a>
+            <a asp-controller="Reports" asp-action="PaymentReport" class="sidebar-link @(currentPath == "/reports/paymentreport" ? "active" : "")">
+                <i class="bi bi-cash-coin"></i>
+                <span>Payment Report</span>
+            </a>
+        </div>
+
+        <!-- Settings -->
+        <div class="nav-section">
+            <span class="nav-section-title">Account</span>
+            <a asp-controller="Home" asp-action="Privacy" class="sidebar-link @(currentPath == "/home/privacy" ? "active" : "")">
+                <i class="bi bi-shield-check"></i>
+                <span>Privacy Policy</span>
+            </a>
+            <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline w-100">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="sidebar-link sidebar-logout-btn">
+                    <i class="bi bi-box-arrow-left"></i>
+                    <span>Logout</span>
+                </button>
+            </form>
+        </div>
+    </nav>
+</aside>
+
+<!-- Sidebar Overlay for Mobile -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
