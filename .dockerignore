@@ -1,0 +1,11 @@
+bin/
+obj/
+.vs/
+**/*.db
+*.user
+*.suo
+*.log
+node_modules/
+npm-debug.log
+*.md
+docker-compose*.yml
