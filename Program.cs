@@ -38,9 +38,18 @@ StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
 // Apply migrations and seed data
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    db.Database.Migrate();
-    await DbSeeder.SeedAsync(db);
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    try
+    {
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        db.Database.Migrate();
+        await DbSeeder.SeedAsync(db);
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Error applying migrations or seeding database.");
+        // Do not rethrow — allow the app to start so Render's health checks can surface the problem.
+    }
 }
 
 // Configure the HTTP request pipeline.
