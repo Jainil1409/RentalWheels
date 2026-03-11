@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Jainil Vyas\\source\\repos\\vehicle management system mvc\\vehicle management system mvc\\vehicle management system mvc.csproj": {}
+    "C:\\Users\\Jainil Vyas\\OneDrive\\Desktop\\DotNet Individual Project\\vehicle management system mvc\\vehicle management system mvc\\vehicle management system mvc.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Jainil Vyas\\source\\repos\\vehicle management system mvc\\vehicle management system mvc\\vehicle management system mvc.csproj": {
+    "C:\\Users\\Jainil Vyas\\OneDrive\\Desktop\\DotNet Individual Project\\vehicle management system mvc\\vehicle management system mvc\\vehicle management system mvc.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Jainil Vyas\\source\\repos\\vehicle management system mvc\\vehicle management system mvc\\vehicle management system mvc.csproj",
+        "projectUniqueName": "C:\\Users\\Jainil Vyas\\OneDrive\\Desktop\\DotNet Individual Project\\vehicle management system mvc\\vehicle management system mvc\\vehicle management system mvc.csproj",
         "projectName": "vehicle management system mvc",
-        "projectPath": "C:\\Users\\Jainil Vyas\\source\\repos\\vehicle management system mvc\\vehicle management system mvc\\vehicle management system mvc.csproj",
+        "projectPath": "C:\\Users\\Jainil Vyas\\OneDrive\\Desktop\\DotNet Individual Project\\vehicle management system mvc\\vehicle management system mvc\\vehicle management system mvc.csproj",
         "packagesPath": "C:\\Users\\Jainil Vyas\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Jainil Vyas\\source\\repos\\vehicle management system mvc\\vehicle management system mvc\\obj\\",
+        "outputPath": "C:\\Users\\Jainil Vyas\\OneDrive\\Desktop\\DotNet Individual Project\\vehicle management system mvc\\vehicle management system mvc\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

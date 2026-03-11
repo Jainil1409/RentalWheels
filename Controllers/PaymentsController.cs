@@ -161,6 +161,10 @@ namespace vehicle_management_system_mvc.Controllers
                     }
                 },
                 Mode = "payment",
+                PaymentIntentData = new SessionPaymentIntentDataOptions
+                {
+                    SetupFutureUsage = "off_session"
+                },
                 SuccessUrl = $"{domain}/Payments/StripeSuccess?bookingId={booking.Id}&sessionId={{CHECKOUT_SESSION_ID}}",
                 CancelUrl = $"{domain}/Payments/Create?bookingId={booking.Id}",
                 Metadata = new Dictionary<string, string>
