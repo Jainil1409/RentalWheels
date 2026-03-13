@@ -48,7 +48,10 @@ namespace vehicle_management_system_mvc.Controllers
             return View();
         }
 
-        // AboutUs view removed per request.
+        public IActionResult AboutUs()
+        {
+            return View();
+        }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

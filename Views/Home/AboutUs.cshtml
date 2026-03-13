@@ -1,0 +1,176 @@
+@{
+    ViewData["Title"] = "About Us";
+    Layout = null; // Use no layout to avoid conflicts with BMW styling
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMW — The All-New Concept | RentWheels</title>
+    <meta name="description" content="Experience the all-new BMW Concept. Uncompromising dynamics meet progressive luxury.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/bm/styles.css">
+</head>
+<body>
+
+<!-- Back to RentWheels Button -->
+<div style="position: fixed; top: 20px; left: 20px; z-index: 10000;">
+    <a href="@Url.Action("Index", "Home")" class="tw-btn" style="background: transparent; border: 1px solid rgba(255, 255, 255, 0.3); padding: 0.5rem 1rem; font-size: 0.75rem;">← Back to RentWheels</a>
+</div>
+
+<!-- Custom Arrow Cursor -->
+<div class="cursor-arrow" id="cursor-arrow">
+    <svg viewBox="0 0 24 24" width="28" height="28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4 2L20 12L12 13.5L8 22L4 2Z" fill="#0a0a0a" stroke="#fff" stroke-width="1.5"
+            stroke-linejoin="round" />
+    </svg>
+</div>
+<div class="cursor-glow" id="cursor-glow"></div>
+
+<!-- Fixed Canvas Wrapper (controls brightness/dimming) -->
+<div id="canvas-wrap" class="canvas-wrap">
+    <canvas id="bmw-canvas"></canvas>
+</div>
+
+<!-- Loading Screen -->
+<div class="loading-screen" id="loading-screen">
+    <div class="loader-ring"></div>
+    <p class="loader-text">Loading Experience</p>
+    <p class="loader-percent" id="loader-percent">0%</p>
+</div>
+
+<!-- Scroll Container — this is what creates the scrollable height -->
+<div class="scroll-container" id="scroll-container">
+
+    <!-- Step 0: Hero Title (visible at 0% scroll) -->
+    <div class="scroll-overlay" id="overlay-hero">
+        <div class="overlay-center">
+            <p class="eyebrow">The All-New</p>
+        <h1 class="hero-headline">RentWheels<br>Concept.</h1>
+            <p class="hero-tagline">Uncompromising dynamics meet progressive luxury.</p>
+            <div class="scroll-indicator">
+                <span class="scroll-arrow"></span>
+                <span class="scroll-label">Scroll to Reveal</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 1: Performance (visible ~20%) -->
+    <div class="scroll-overlay" id="overlay-perf">
+        <div class="overlay-left">
+            <p class="overlay-kicker">Performance</p>
+            <h2 class="overlay-title">Engineered<br>Without<br>Compromise.</h2>
+        </div>
+    </div>
+
+    <!-- Step 2: Design (visible ~50%) -->
+    <div class="scroll-overlay" id="overlay-design">
+        <div class="overlay-right">
+            <p class="overlay-kicker">Design</p>
+            <h2 class="overlay-title">Every Curve<br>Tells a Story.</h2>
+            <p class="overlay-desc">Sculpted aerodynamics. Iconic kidney grille. Laser-precision headlights.</p>
+        </div>
+    </div>
+
+    <!-- Step 3: Specs / Editorial Panel (visible ~70%) -->
+    <div class="scroll-overlay" id="overlay-specs">
+        <div class="glass-card specs-card">
+            <div class="specs-grid">
+                <div class="spec-item">
+                    <span class="spec-value">4.1s</span>
+                    <span class="spec-label">0–100 km/h</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-value">530</span>
+                    <span class="spec-label">Horsepower</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-value">AWD</span>
+                    <span class="spec-label">xDrive</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-value">★ 4.9</span>
+                    <span class="spec-label">Rating</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 4: CTA (visible ~90%) -->
+    <div class="scroll-overlay" id="overlay-cta">
+        <div class="overlay-center">
+            <h2 class="cta-headline">Experience<br>The Drive.</h2>
+            <a href="#" class="cta-button">Configure Yours</a>
+        </div>
+    </div>
+
+</div>
+
+<!-- Stats Cards Section -->
+
+<!-- Testimonials Section -->
+<section class="testimonials-section" id="testimonials">
+    <!-- Floating bubbles -->
+    <div class="bubble-container">
+        <div class="bubble" style="--size:60px;--x:10%;--delay:0s;--dur:6s;"></div>
+        <div class="bubble" style="--size:30px;--x:25%;--delay:1s;--dur:8s;"></div>
+        <div class="bubble" style="--size:45px;--x:40%;--delay:2s;--dur:7s;"></div>
+        <div class="bubble" style="--size:25px;--x:55%;--delay:0.5s;--dur:9s;"></div>
+        <div class="bubble" style="--size:50px;--x:70%;--delay:3s;--dur:6.5s;"></div>
+        <div class="bubble" style="--size:35px;--x:85%;--delay:1.5s;--dur:7.5s;"></div>
+        <div class="bubble" style="--size:20px;--x:15%;--delay:4s;--dur:8.5s;"></div>
+        <div class="bubble" style="--size:40px;--x:90%;--delay:2.5s;--dur:5.5s;"></div>
+    </div>
+
+    <div class="testimonials-header anim">
+        <p class="testimonials-kicker">TESTIMONIALS</p>
+        <h2 class="testimonials-title">What people say</h2>
+        <p class="testimonials-subtitle">Discover what our drivers have to say about their BMW experience.</p>
+    </div>
+
+    <div class="testimonials-grid">
+        <div class="testimonial-card">
+            <div class="tc-avatar">AK</div>
+            <h4 class="tc-name">Alexander Klein</h4>
+            <p class="tc-role">Automotive Journalist</p>
+            <p class="tc-quote">"The driving dynamics are unmatched. Every curve feels like it was engineered just
+                for you. This is what BMW was born to do."</p>
+        </div>
+        <div class="testimonial-card">
+            <div class="tc-avatar">SM</div>
+            <h4 class="tc-name">Sarah Mitchell</h4>
+            <p class="tc-role">Tech Executive</p>
+            <p class="tc-quote">"I've driven everything from Porsche to Mercedes. Nothing comes close to the
+                visceral connection you feel behind this wheel."</p>
+        </div>
+        <div class="testimonial-card">
+            <div class="tc-avatar">RJ</div>
+            <h4 class="tc-name">Raj Mehta</h4>
+            <p class="tc-role">Venture Capitalist</p>
+            <p class="tc-quote">"The perfect blend of luxury and raw performance. My passengers are always amazed by
+                the comfort, and I'm addicted to the power."</p>
+        </div>
+    </div>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; margin-top: 2rem;">
+            <a href="@Url.Action("Index", "Vehicles")" class="tw-btn">Book Your Rental Car</a>
+        </div>
+</section>
+
+<!-- Typewriter CTA Section -->
+<section class="typewriter-section" id="typewriter-section">
+    <div class="tw-content anim fade-left">
+        <p class="tw-kicker"><span class="tw-arrow">▶</span> GET STARTED</p>
+        <h2 class="tw-headline">
+            <span class="tw-white" id="tw-line1"></span><br>
+            <span class="tw-muted" id="tw-line2"></span>
+        </h2>
+    </div>
+</section>
+
+<script src="~/bm/scripts.js"></script>
+</body>
+</html>
