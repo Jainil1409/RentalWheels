@@ -3,78 +3,83 @@
     ViewData["Title"] = "Add Vehicle";
 }
 
-<div class="section-header animate-fade-in-up">
-    <h2><i class="bi bi-plus-circle me-2 text-gradient"></i>Add New Vehicle</h2>
-    <p>Register a new vehicle to the rental fleet.</p>
-</div>
-
-<div class="row">
-    <div class="col-lg-8 animate-fade-in-up">
-        <div class="vrms-form-card">
-            <form asp-action="Create" method="post">
-                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="Brand" class="form-label"><i class="bi bi-tag me-1"></i>Brand</label>
-                        <input asp-for="Brand" class="form-control" />
-                        <span asp-validation-for="Brand" class="text-danger"></span>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="Model" class="form-label"><i class="bi bi-car-front me-1"></i>Model</label>
-                        <input asp-for="Model" class="form-control" />
-                        <span asp-validation-for="Model" class="text-danger"></span>
-                    </div>
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-header bg-gradient py-4 rounded-top-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <h2 class="mb-2"><i class="bi bi-plus-circle me-2"></i>Add New Vehicle</h2>
+                    <p class="mb-0">Register a new vehicle to the rental fleet</p>
                 </div>
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label asp-for="Type" class="form-label"><i class="bi bi-grid me-1"></i>Type</label>
-                        <select asp-for="Type" class="form-select" asp-items="Html.GetEnumSelectList<VehicleType>()"></select>
-                        <span asp-validation-for="Type" class="text-danger"></span>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label asp-for="Year" class="form-label"><i class="bi bi-calendar3 me-1"></i>Year</label>
-                        <input asp-for="Year" class="form-control" type="number" />
-                        <span asp-validation-for="Year" class="text-danger"></span>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label asp-for="PricePerDay" class="form-label"><i class="bi bi-cash me-1"></i>Price Per Day</label>
-                        <div class="input-group">
-                            <span class="input-group-text">₹</span>
-                            <input asp-for="PricePerDay" class="form-control" type="number" step="0.01" />
+                <div class="card-body p-4 p-md-5">
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3"></div>
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label asp-for="Brand" class="form-label fw-semibold"><i class="bi bi-tag me-2 text-primary"></i>Brand</label>
+                                <input asp-for="Brand" class="form-control form-control-lg rounded-3" placeholder="e.g., Toyota, Honda" />
+                                <span asp-validation-for="Brand" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Model" class="form-label fw-semibold"><i class="bi bi-car-front me-2 text-primary"></i>Model</label>
+                                <input asp-for="Model" class="form-control form-control-lg rounded-3" placeholder="e.g., Camry, Civic" />
+                                <span asp-validation-for="Model" class="text-danger small"></span>
+                            </div>
                         </div>
-                        <span asp-validation-for="PricePerDay" class="text-danger"></span>
-                    </div>
+                        <div class="row g-4">
+                            <div class="col-md-4">
+                                <label asp-for="Type" class="form-label fw-semibold"><i class="bi bi-grid me-2 text-primary"></i>Type</label>
+                                <select asp-for="Type" class="form-select form-select-lg rounded-3" asp-items="Html.GetEnumSelectList<VehicleType>()"></select>
+                                <span asp-validation-for="Type" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="Year" class="form-label fw-semibold"><i class="bi bi-calendar3 me-2 text-primary"></i>Year</label>
+                                <input asp-for="Year" class="form-control form-control-lg rounded-3" type="number" placeholder="2024" />
+                                <span asp-validation-for="Year" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="PricePerDay" class="form-label fw-semibold"><i class="bi bi-cash me-2 text-primary"></i>Price Per Day</label>
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text rounded-start-3 bg-light">₹</span>
+                                    <input asp-for="PricePerDay" class="form-control rounded-end-3" type="number" step="0.01" placeholder="1000.00" />
+                                </div>
+                                <span asp-validation-for="PricePerDay" class="text-danger small"></span>
+                            </div>
+                        </div>
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label asp-for="LicensePlate" class="form-label fw-semibold"><i class="bi bi-card-text me-2 text-primary"></i>License Plate</label>
+                                <input asp-for="LicensePlate" class="form-control form-control-lg rounded-3" placeholder="e.g., ABC-1234" />
+                                <span asp-validation-for="LicensePlate" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="ImageUrl" class="form-label fw-semibold"><i class="bi bi-image me-2 text-primary"></i>Image URL</label>
+                                <input asp-for="ImageUrl" class="form-control form-control-lg rounded-3" placeholder="https://example.com/image.jpg" />
+                                <span asp-validation-for="ImageUrl" class="text-danger small"></span>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label asp-for="Description" class="form-label fw-semibold"><i class="bi bi-text-paragraph me-2 text-primary"></i>Description</label>
+                            <textarea asp-for="Description" class="form-control form-control-lg rounded-3" rows="4" placeholder="Enter vehicle description and features..."></textarea>
+                            <span asp-validation-for="Description" class="text-danger small"></span>
+                        </div>
+                        <div class="mb-4 p-3 bg-light rounded-3">
+                            <div class="form-check">
+                                <input asp-for="IsAvailable" class="form-check-input" style="width: 1.5em; height: 1.5em;" />
+                                <label asp-for="IsAvailable" class="form-check-label fw-semibold ms-2" style="margin-top: 0.2em;">Available for Rental</label>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-3 pt-3">
+                            <button type="submit" class="btn btn-lg px-5 py-3 text-white rounded-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                <i class="bi bi-plus-circle me-2"></i>Add Vehicle
+                            </button>
+                            <a asp-action="Index" class="btn btn-outline-secondary btn-lg px-5 py-3 rounded-3">
+                                <i class="bi bi-arrow-left me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
                 </div>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="LicensePlate" class="form-label"><i class="bi bi-card-text me-1"></i>License Plate</label>
-                        <input asp-for="LicensePlate" class="form-control" />
-                        <span asp-validation-for="LicensePlate" class="text-danger"></span>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="ImageUrl" class="form-label"><i class="bi bi-image me-1"></i>Image URL</label>
-                        <input asp-for="ImageUrl" class="form-control" placeholder="https://..." />
-                        <span asp-validation-for="ImageUrl" class="text-danger"></span>
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <label asp-for="Description" class="form-label"><i class="bi bi-text-paragraph me-1"></i>Description</label>
-                    <textarea asp-for="Description" class="form-control" rows="3"></textarea>
-                    <span asp-validation-for="Description" class="text-danger"></span>
-                </div>
-                <div class="mb-4 form-check">
-                    <input asp-for="IsAvailable" class="form-check-input" />
-                    <label asp-for="IsAvailable" class="form-check-label">Available for Rental</label>
-                </div>
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-plus-circle me-1"></i>Add Vehicle
-                    </button>
-                    <a asp-action="Index" class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-left me-1"></i>Cancel
-                    </a>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
 </div>

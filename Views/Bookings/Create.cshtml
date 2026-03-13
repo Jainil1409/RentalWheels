@@ -3,65 +3,608 @@
     ViewData["Title"] = "Book Vehicle";
 }
 
-<div class="section-header animate-fade-in-up">
-    <h2><i class="bi bi-calendar-plus me-2 text-gradient"></i>Book Vehicle</h2>
+<style>
+    .bv-section-header {
+        margin-bottom: 1.75rem;
+        animation: bvFadeInUp .45s ease both;
+    }
+
+    .bv-section-header h2 {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--gray-900);
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+        margin-bottom: 0;
+    }
+
+    .bv-section-header p {
+        color: var(--gray-500);
+        font-size: .9rem;
+        margin-top: .3rem;
+        margin-bottom: 0;
+    }
+
+    .bv-layout {
+        display: grid;
+        grid-template-columns: 1fr 340px;
+        gap: 1.5rem;
+        align-items: start;
+        width: 100%;
+    }
+
+    /* ── Main Form Card ── */
+    .bv-form-card {
+        background: #fff;
+        border-radius: 16px;
+        border: 1px solid var(--gray-200);
+        box-shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+        overflow: hidden;
+        animation: bvFadeInLeft .45s .05s ease both;
+        opacity: 0;
+        width: 100%;
+    }
+
+    /* ── Vehicle Hero Strip ── */
+    .bv-vehicle-strip {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #1a1040 100%);
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1.1rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .bv-vehicle-strip::before {
+        content: '';
+        position: absolute;
+        top: -30px;
+        right: -30px;
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: rgba(99,102,241,.12);
+        pointer-events: none;
+    }
+
+    .bv-vehicle-strip::after {
+        content: '';
+        position: absolute;
+        bottom: -20px;
+        left: 40%;
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: rgba(139,92,246,.08);
+        pointer-events: none;
+    }
+
+    .bv-vehicle-img {
+        width: 68px;
+        height: 68px;
+        border-radius: 10px;
+        object-fit: cover;
+        border: 2px solid rgba(99,102,241,.35);
+        flex-shrink: 0;
+    }
+
+    .bv-vehicle-placeholder {
+        width: 68px;
+        height: 68px;
+        border-radius: 10px;
+        background: rgba(99,102,241,.15);
+        border: 1.5px solid rgba(99,102,241,.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .bv-vehicle-placeholder i {
+        font-size: 1.8rem;
+        color: #818cf8;
+    }
+
+    .bv-vehicle-name {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #fff;
+        margin: 0;
+    }
+
+    .bv-vehicle-meta {
+        font-size: 12px;
+        color: rgba(255,255,255,.45);
+        margin-top: 2px;
+    }
+
+    .bv-vehicle-price {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #fff;
+        margin-top: .4rem;
+        margin-bottom: 0;
+    }
+
+    .bv-vehicle-price span {
+        font-size: .75rem;
+        font-weight: 400;
+        color: rgba(255,255,255,.4);
+    }
+
+    .bv-available-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: rgba(16,185,129,.15);
+        border: 1px solid rgba(16,185,129,.3);
+        color: #34d399;
+        font-size: 11px;
+        border-radius: 20px;
+        padding: 2px 9px;
+        margin-top: .35rem;
+    }
+
+    .bv-available-badge::before {
+        content: '';
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: #10b981;
+        display: inline-block;
+    }
+
+    /* ── Form Body ── */
+    .bv-form-inner {
+        padding: 1.75rem;
+    }
+
+    .bv-form-section-title {
+        font-size: 11px;
+        letter-spacing: .09em;
+        text-transform: uppercase;
+        color: var(--gray-400, #94a3b8);
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .bv-date-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .bv-field {
+        display: flex;
+        flex-direction: column;
+        gap: .35rem;
+    }
+
+    .bv-field-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--gray-700, #334155);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        margin-bottom: 0;
+    }
+
+    .bv-field-label i {
+        font-size: .75rem;
+        opacity: .55;
+    }
+
+    .bv-field .form-control {
+        padding: .65rem .9rem;
+        border: 1.5px solid var(--gray-200, #e2e8f0);
+        border-radius: 8px;
+        font-size: 14px;
+        color: var(--gray-800, #1e293b);
+        background: var(--gray-50, #f8fafc);
+        transition: border-color .2s, box-shadow .2s;
+        box-shadow: none;
+        height: auto;
+    }
+
+    .bv-field .form-control:focus {
+        border-color: var(--primary, #6366f1);
+        box-shadow: 0 0 0 3px rgba(99,102,241,.12);
+        outline: none;
+    }
+
+    .bv-divider {
+        height: 1px;
+        background: var(--gray-200, #e2e8f0);
+        margin: 1.5rem 0;
+    }
+
+    /* ── Buttons ── */
+    .bv-btn-row {
+        display: flex;
+        gap: .65rem;
+        flex-wrap: wrap;
+    }
+
+    .bv-btn-confirm {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: .65rem 1.5rem;
+        background: var(--primary, #6366f1);
+        color: #fff !important;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all .18s;
+        font-family: inherit;
+        text-decoration: none !important;
+    }
+
+    .bv-btn-confirm:hover {
+        background: var(--primary-dark, #4f46e5);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(99,102,241,.3);
+        color: #fff !important;
+    }
+
+    .bv-btn-cancel {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: .65rem 1.2rem;
+        background: transparent;
+        color: var(--gray-600, #475569) !important;
+        border: 1.5px solid var(--gray-200, #e2e8f0);
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all .18s;
+        font-family: inherit;
+        text-decoration: none !important;
+    }
+
+    .bv-btn-cancel:hover {
+        border-color: var(--gray-400, #94a3b8);
+        color: var(--gray-800, #1e293b) !important;
+        background: var(--gray-50, #f8fafc);
+    }
+
+    /* ── Summary Sidebar ── */
+    .bv-summary-card {
+        background: #fff;
+        border-radius: 16px;
+        border: 1px solid var(--gray-200, #e2e8f0);
+        box-shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+        overflow: hidden;
+        position: sticky;
+        top: 1.25rem;
+        animation: bvFadeInLeft .45s .15s ease both;
+        opacity: 0;
+    }
+
+    .bv-summary-head {
+        background: linear-gradient(135deg, var(--primary, #6366f1), var(--secondary, #8b5cf6));
+        padding: 1.15rem 1.4rem;
+    }
+
+    .bv-summary-head h3 {
+        color: #fff;
+        font-size: 1rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .bv-summary-head p {
+        color: rgba(255,255,255,.55);
+        font-size: 12px;
+        margin-top: 3px;
+        margin-bottom: 0;
+    }
+
+    .bv-summary-body {
+        padding: 1.15rem 1.4rem;
+    }
+
+    .bv-summary-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: .55rem 0;
+        border-bottom: 1px solid var(--gray-100, #f1f5f9);
+    }
+
+    .bv-summary-row:last-of-type {
+        border-bottom: none;
+    }
+
+    .bv-s-label {
+        font-size: 12.5px;
+        color: var(--gray-500, #64748b);
+    }
+
+    .bv-s-value {
+        font-size: 13px;
+        color: var(--gray-800, #1e293b);
+        font-weight: 600;
+        text-align: right;
+    }
+
+    .bv-s-value.bv-accent {
+        color: var(--primary, #6366f1);
+        font-size: 14px;
+    }
+
+    .bv-total-box {
+        background: linear-gradient(135deg, rgba(99,102,241,.06), rgba(139,92,246,.06));
+        border: 1px solid rgba(99,102,241,.15);
+        border-radius: 8px;
+        padding: .9rem 1rem;
+        margin-top: .9rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .bv-total-label {
+        font-size: 11px;
+        color: var(--gray-500, #64748b);
+        letter-spacing: .06em;
+        text-transform: uppercase;
+        font-weight: 600;
+    }
+
+    .bv-total-value {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--gray-900, #0f172a);
+    }
+
+    .bv-note-box {
+        display: flex;
+        gap: .55rem;
+        align-items: flex-start;
+        background: rgba(6,182,212,.06);
+        border: 1px solid rgba(6,182,212,.2);
+        border-radius: 8px;
+        padding: .75rem .85rem;
+        margin-top: .9rem;
+    }
+
+    .bv-note-box i {
+        font-size: .8rem;
+        color: #06b6d4;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
+    .bv-note-box p {
+        font-size: 12px;
+        color: var(--gray-500, #64748b);
+        line-height: 1.5;
+        margin: 0;
+    }
+
+    /* ── Animations ── */
+    @@keyframes bvFadeInUp {
+        from { opacity: 0; transform: translateY(16px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @@keyframes bvFadeInLeft {
+        from { opacity: 0; transform: translateX(-14px); }
+        to   { opacity: 1; transform: translateX(0); }
+    }
+
+    /* ── Responsive ── */
+    @@media (max-width: 900px) {
+        .bv-layout {
+            grid-template-columns: 1fr;
+        }
+        .bv-summary-card {
+            position: static;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .bv-date-row {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+
+<div class="bv-section-header">
+    <h2>
+        <i class="bi bi-calendar-plus me-2 text-gradient"></i>Book Vehicle
+    </h2>
     <p>Complete the form below to reserve your vehicle.</p>
 </div>
 
-<div class="row g-4">
-    <div class="col-lg-7 animate-fade-in-left">
-        <div class="vrms-form-card">
+<div class="bv-layout">
+
+    <div>
+        <div class="bv-form-card">
+
             @if (Model.Vehicle != null)
             {
-                <div class="d-flex align-items-center mb-4 pb-3" style="border-bottom:1px solid var(--gray-200);">
+                <div class="bv-vehicle-strip">
                     @if (!string.IsNullOrEmpty(Model.Vehicle.ImageUrl))
                     {
-                        <img src="@Model.Vehicle.ImageUrl" alt="@Model.Vehicle.Brand @Model.Vehicle.Model" style="width:80px;height:80px;border-radius:var(--radius);min-width:80px;object-fit:cover;" loading="lazy" />
+                        <img src="@Model.Vehicle.ImageUrl"
+                             alt="@Model.Vehicle.Brand @Model.Vehicle.Model"
+                             class="bv-vehicle-img"
+                             loading="lazy" />
                     }
                     else
                     {
-                        <div class="vehicle-img-placeholder @Model.Vehicle.Type.ToString().ToLower()" style="width:80px;height:80px;border-radius:var(--radius);min-width:80px;">
-                            <i class="bi bi-car-front-fill" style="font-size:2rem;"></i>
+                        <div class="bv-vehicle-placeholder">
+                            <i class="bi bi-car-front-fill"></i>
                         </div>
                     }
-                    <div class="ms-3">
-                        <h4 class="mb-0">@Model.Vehicle.Brand @Model.Vehicle.Model</h4>
-                        <span class="text-muted">@Model.Vehicle.Year &middot; @Model.Vehicle.Type</span>
-                        <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:1.25rem;color:var(--primary);">
-                            ₹@Model.Vehicle.PricePerDay.ToString("N2") <span style="font-size:0.85rem;font-weight:400;color:var(--gray-500);">/ day</span>
-                        </div>
+                    <div>
+                        <p class="bv-vehicle-name">@Model.Vehicle.Brand @Model.Vehicle.Model</p>
+                        <div class="bv-vehicle-meta">@Model.Vehicle.Year &nbsp;&middot;&nbsp; @Model.Vehicle.Type</div>
+                        <p class="bv-vehicle-price">
+                            &#8377;@Model.Vehicle.PricePerDay.ToString("N2") <span>/ day</span>
+                        </p>
+                        <div class="bv-available-badge">Available</div>
                     </div>
                 </div>
             }
 
-            <form asp-action="Create" method="post">
-                <input type="hidden" asp-for="VehicleId" />
-                <div asp-validation-summary="All" class="text-danger mb-3"></div>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="StartDate" class="form-label"><i class="bi bi-calendar-event me-1"></i>Start Date</label>
-                        <input asp-for="StartDate" type="date" class="form-control" min="@DateTime.Today.ToString("yyyy-MM-dd")" />
-                        <span asp-validation-for="StartDate" class="text-danger"></span>
+            <div class="bv-form-inner">
+                <div class="bv-form-section-title">Select Travel Dates</div>
+
+                <form asp-action="Create" method="post">
+                    <input type="hidden" asp-for="VehicleId" />
+
+                    <div asp-validation-summary="All" class="text-danger mb-3 small"></div>
+
+                    <div class="bv-date-row">
+                        <div class="bv-field">
+                            <label asp-for="StartDate" class="bv-field-label">
+                                <i class="bi bi-calendar-event"></i> Start Date
+                            </label>
+                            <input asp-for="StartDate"
+                                   type="date"
+                                   class="form-control"
+                                   min="@DateTime.Today.ToString("yyyy-MM-dd")"
+                                   id="bvStartDate"
+                                   oninput="bvCalcTotal()" />
+                            <span asp-validation-for="StartDate" class="text-danger small"></span>
+                        </div>
+
+                        <div class="bv-field">
+                            <label asp-for="EndDate" class="bv-field-label">
+                                <i class="bi bi-calendar-check"></i> End Date
+                            </label>
+                            <input asp-for="EndDate"
+                                   type="date"
+                                   class="form-control"
+                                   min="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")"
+                                   id="bvEndDate"
+                                   oninput="bvCalcTotal()" />
+                            <span asp-validation-for="EndDate" class="text-danger small"></span>
+                        </div>
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="EndDate" class="form-label"><i class="bi bi-calendar-check me-1"></i>End Date</label>
-                        <input asp-for="EndDate" type="date" class="form-control" min="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" />
-                        <span asp-validation-for="EndDate" class="text-danger"></span>
+
+                    <div class="bv-divider"></div>
+
+                    <div class="bv-btn-row">
+                        <button type="submit" class="bv-btn-confirm">
+                            <i class="bi bi-check-circle"></i> Confirm Booking
+                        </button>
+                        <a asp-controller="Vehicles"
+                           asp-action="Details"
+                           asp-route-id="@Model.VehicleId"
+                           class="bv-btn-cancel">
+                            <i class="bi bi-arrow-left"></i> Cancel
+                        </a>
                     </div>
-                </div>
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-check-circle me-1"></i>Confirm Booking
-                    </button>
-                    <a asp-controller="Vehicles" asp-action="Details" asp-route-id="@Model.VehicleId" class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-left me-1"></i>Cancel
-                    </a>
-                </div>
-            </form>
+                </form>
+            </div>
+
         </div>
     </div>
+
+    <div class="bv-summary-card">
+        <div class="bv-summary-head">
+            <h3>Booking Summary</h3>
+            <p>Live calculation from your dates</p>
+        </div>
+        <div class="bv-summary-body">
+
+            <div class="bv-summary-row">
+                <span class="bv-s-label">Vehicle</span>
+                <span class="bv-s-value">
+                    @(Model.Vehicle != null ? $"{Model.Vehicle.Brand} {Model.Vehicle.Model}" : "—")
+                </span>
+            </div>
+
+            <div class="bv-summary-row">
+                <span class="bv-s-label">Rate</span>
+                <span class="bv-s-value">
+                    @(Model.Vehicle != null ? $"₹{Model.Vehicle.PricePerDay:N2} / day" : "—")
+                </span>
+            </div>
+
+            <div class="bv-summary-row">
+                <span class="bv-s-label">Start Date</span>
+                <span class="bv-s-value" id="bvSumStart">—</span>
+            </div>
+
+            <div class="bv-summary-row">
+                <span class="bv-s-label">End Date</span>
+                <span class="bv-s-value" id="bvSumEnd">—</span>
+            </div>
+
+            <div class="bv-summary-row">
+                <span class="bv-s-label">Duration</span>
+                <span class="bv-s-value bv-accent" id="bvSumDays">— days</span>
+            </div>
+
+            <div class="bv-total-box">
+                <span class="bv-total-label">Total</span>
+                <span class="bv-total-value" id="bvSumTotal">&#8377;—</span>
+            </div>
+
+            <div class="bv-note-box">
+                <i class="bi bi-info-circle-fill"></i>
+                <p>Free cancellation up to 24 hrs before pick-up. No payment until confirmation.</p>
+            </div>
+
+        </div>
+    </div>
+
 </div>
+
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        const bvPricePerDay = @(Model.Vehicle?.PricePerDay.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "0");
+
+        function bvFormatDate(val) {
+            if (!val) return '—';
+            const d = new Date(val + 'T00:00:00');
+            return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        function bvCalcTotal() {
+            const start = document.getElementById('bvStartDate').value;
+            const end   = document.getElementById('bvEndDate').value;
+
+            document.getElementById('bvSumStart').textContent = bvFormatDate(start);
+            document.getElementById('bvSumEnd').textContent   = bvFormatDate(end);
+
+            if (start && end) {
+                const diff = Math.round((new Date(end) - new Date(start)) / 86400000);
+                if (diff > 0) {
+                    document.getElementById('bvSumDays').textContent  = diff + ' day' + (diff !== 1 ? 's' : '');
+                    document.getElementById('bvSumTotal').textContent =
+                        '₹' + (diff * bvPricePerDay).toLocaleString('en-IN', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        });
+                } else {
+                    document.getElementById('bvSumDays').textContent  = '— days';
+                    document.getElementById('bvSumTotal').textContent = '₹—';
+                }
+            }
+        }
+
+        (function () {
+            const s = document.getElementById('bvStartDate').value;
+            const e = document.getElementById('bvEndDate').value;
+            if (s || e) bvCalcTotal();
+        })();
+    </script>
 }
