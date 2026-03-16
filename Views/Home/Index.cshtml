@@ -197,7 +197,47 @@
     @@media (max-width: 1199px) {
         .hero-title { font-size: 2.8rem; }
         .hero-car-img { transform: scale(1); width: 100%; }
-        .hero-right { max-width: 200px; }
+        .hero-right { max-width: 300px; }
+    }
+
+    @@media (max-width: 991px) {
+        .hero-driveonix {
+            padding: 8rem 0 4rem 0;
+            min-height: auto;
+            text-align: center;
+        }
+        .hero-container {
+            justify-content: center;
+            gap: 3rem;
+        }
+        .hero-left {
+            max-width: 100%;
+            text-align: center;
+        }
+        .hero-right {
+            max-width: 100%;
+            align-items: center;
+            text-align: center;
+        }
+        .hero-reviews {
+            align-items: center !important;
+            text-align: center !important;
+        }
+        .hero-features {
+            align-items: center;
+        }
+        .hero-center {
+            padding: 0;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .hero-title { font-size: 2.2rem; }
+        .hero-desc { font-size: 0.95rem; }
+        .btn-get-started { padding: 0.8rem 2rem; font-size: 1rem; }
+        .hero-bg-text { font-size: 35vw; top: 10%; }
+        .hero-car-img { margin-top: 1rem; }
+    }
     }
     
     @@media (max-width: 991px) {

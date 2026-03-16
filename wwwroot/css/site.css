@@ -488,17 +488,87 @@ a:hover { color: var(--primary-dark); }
 .skeleton { background: linear-gradient(90deg, var(--gray-200) 25%, var(--gray-100) 50%, var(--gray-200) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: var(--radius-sm); }
 
 /* === RESPONSIVE === */
+@media (max-width: 991.98px) {
+    .admin-main-content {
+        margin-left: 0;
+        padding: 1.5rem 1rem 3rem;
+    }
+    body.admin-layout .vrms-footer {
+        margin-left: 0;
+    }
+    .hero-section {
+        padding: 5rem 0;
+    }
+    .hero-content h1 {
+        font-size: 2.5rem;
+    }
+    .hero-logo {
+        height: 150px;
+    }
+}
+
 @media (max-width: 768px) {
+    /* Global Adjustments */
+    html, body {
+        overflow-x: hidden;
+    }
+    .container {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    
+    /* Hero Adjustments */
     .hero-section { padding: 3rem 0; border-radius: 0 0 30px 30px; }
     .hero-content h1 { font-size: 2rem; }
-    .hero-logo { height: 150px; }
+    .hero-content p { font-size: 1rem; }
+    .hero-logo { height: 120px; }
+    
+    /* Cards */
     .stat-card { margin-bottom: 1rem; }
-    .footer-bottom { flex-direction: column; text-align: center; }
+    
+    /* Forms & Utilities */
+    .vrms-form-card { padding: 1.5rem; }
+    .btn-hero { width: 100%; margin-bottom: 0.5rem; display: block; }
+    
+    /* Footer */
+    .footer-bottom { flex-direction: column; text-align: center; gap: 1rem; }
+    .vrms-footer { padding: 3rem 0 1rem; text-align: center; }
+    .vrms-footer .col-lg-4, .vrms-footer .col-lg-2, .vrms-footer .col-md-4 { margin-bottom: 2rem; }
+    .footer-links li i { justify-content: center; width: 100%; display: block; margin-bottom: 0.25rem;}
+    
+    /* Table Fixes */
+    .vrms-table {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: var(--radius);
+    }
+    .vrms-table .table {
+        min-width: 600px; /* Ensure content is readable and forces native table-responsive scroll */
+    }
+    
+    /* Admin Dash & Headers */
+    .dashboard-header {
+        padding: 1.5rem;
+        text-align: center;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    .dashboard-header .d-flex {
+        flex-direction: column;
+        width: 100%;
+    }
+    .dashboard-header .btn {
+        width: 100%;
+        margin-top: 0.5rem;
+    }
 }
+
 @media (max-width: 576px) {
     .vrms-navbar .navbar-brand { font-size: 1.1rem; }
-    .hero-content h1 { font-size: 1.6rem; }
-    .auth-card { padding: 1.5rem; }
+    .hero-content h1 { font-size: 1.7rem; }
+    .auth-card { padding: 1.25rem; }
+    .vehicle-card .vehicle-img { height: 180px; }
+    .vehicle-img-placeholder { height: 180px; }
 }
 
 /* ============================================================
