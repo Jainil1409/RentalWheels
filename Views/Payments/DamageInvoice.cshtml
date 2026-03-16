@@ -110,9 +110,18 @@
             <a href="@Model.PdfUrl" target="_blank" class="btn btn-danger">
                 <i class="bi bi-file-earmark-pdf me-1"></i>Download PDF
             </a>
-            <a asp-controller="Home" asp-action="Notifications" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left me-1"></i>Back
-            </a>
+            @if (User.IsInRole("Admin"))
+            {
+                <a asp-controller="Payments" asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>Back
+                </a>
+            }
+            else
+            {
+                <a asp-controller="Home" asp-action="Notifications" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>Back
+                </a>
+            }
         </div>
     </div>
 </div>

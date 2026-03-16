@@ -190,6 +190,7 @@
               {
                 int pendingPaymentCount = 0;
                 int kycNotificationCount = 0;
+                int damageReportCount = 0;
                 if (User.IsInRole("Customer"))
                 {
                     var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -200,14 +201,16 @@
                             && !_context.Payments.Any(p => p.BookingId == b.Id && p.Status == PaymentStatus.Completed));
                             
                         var currentUser = _context.Users.Find(userId);
-                        if (currentUser != null && string.IsNullOrEmpty(currentUser.DriverLicenseNumber) || (currentUser != null && !currentUser.IsVerified))
+                        if (currentUser != null && (string.IsNullOrEmpty(currentUser.DriverLicenseNumber) || !currentUser.IsVerified))
                         {
                             kycNotificationCount = 1;
                         }
+
+                        damageReportCount = _context.DamageReports.Count(d => d.Booking != null && d.Booking.CustomerId == userId && !d.IsPaid);
                     }
                 }
                 
-                int totalUserNotifications = pendingPaymentCount + kycNotificationCount;
+                int totalUserNotifications = pendingPaymentCount + kycNotificationCount + damageReportCount;
 
                 @if (User.IsInRole("Customer"))
                 {
