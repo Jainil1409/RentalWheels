@@ -57,7 +57,43 @@ namespace vehicle_management_system_mvc.Migrations
 
                     b.HasIndex("VehicleId");
 
-                    b.ToTable("Bookings", (string)null);
+                    b.ToTable("Bookings");
+                });
+
+            modelBuilder.Entity("vehicle_management_system_mvc.Models.DamageReport", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BookingId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("DamageCost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsPaid")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("PdfUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BookingId")
+                        .IsUnique();
+
+                    b.ToTable("DamageReports");
                 });
 
             modelBuilder.Entity("vehicle_management_system_mvc.Models.Payment", b =>
@@ -96,7 +132,7 @@ namespace vehicle_management_system_mvc.Migrations
                     b.HasIndex("BookingId")
                         .IsUnique();
 
-                    b.ToTable("Payments", (string)null);
+                    b.ToTable("Payments");
                 });
 
             modelBuilder.Entity("vehicle_management_system_mvc.Models.User", b =>
@@ -107,8 +143,16 @@ namespace vehicle_management_system_mvc.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Address")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DriverLicenseNumber")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -119,6 +163,15 @@ namespace vehicle_management_system_mvc.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
+
+                    b.Property<string>("IdProofUrl")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsVerified")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("LicenseExpiryDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
@@ -137,7 +190,7 @@ namespace vehicle_management_system_mvc.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("vehicle_management_system_mvc.Models.Vehicle", b =>
@@ -187,7 +240,7 @@ namespace vehicle_management_system_mvc.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Vehicles", (string)null);
+                    b.ToTable("Vehicles");
                 });
 
             modelBuilder.Entity("vehicle_management_system_mvc.Models.Booking", b =>
@@ -209,6 +262,17 @@ namespace vehicle_management_system_mvc.Migrations
                     b.Navigation("Vehicle");
                 });
 
+            modelBuilder.Entity("vehicle_management_system_mvc.Models.DamageReport", b =>
+                {
+                    b.HasOne("vehicle_management_system_mvc.Models.Booking", "Booking")
+                        .WithOne("DamageReport")
+                        .HasForeignKey("vehicle_management_system_mvc.Models.DamageReport", "BookingId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Booking");
+                });
+
             modelBuilder.Entity("vehicle_management_system_mvc.Models.Payment", b =>
                 {
                     b.HasOne("vehicle_management_system_mvc.Models.Booking", "Booking")
@@ -222,6 +286,8 @@ namespace vehicle_management_system_mvc.Migrations
 
             modelBuilder.Entity("vehicle_management_system_mvc.Models.Booking", b =>
                 {
+                    b.Navigation("DamageReport");
+
                     b.Navigation("Payment");
                 });
 

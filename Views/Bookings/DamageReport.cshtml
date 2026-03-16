@@ -1,0 +1,52 @@
+@model vehicle_management_system_mvc.Models.DamageReport
+
+@{
+    ViewData["Title"] = "Generate Damage Report";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-danger text-white border-0 py-3">
+                    <h4 class="mb-0 fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i>Damage Assessment</h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-info">
+                        <strong>Booking #@Model.BookingId</strong> - Please specify any damages found upon vehicle return. If there are no damages, leave the cost at 0.
+                    </div>
+
+                    <form asp-action="GenerateDamageReport" asp-controller="Bookings" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="BookingId" />
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label fw-bold">Damage Description</label>
+                            <textarea asp-for="Description" class="form-control" rows="4" placeholder="Describe any scratches, dents, or interior damage... (Leave blank if none)"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="DamageCost" class="form-label fw-bold">Estimated Cost (₹)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">₹</span>
+                                <input asp-for="DamageCost" class="form-control border-start-0" type="number" step="0.01" min="0" value="0.00" />
+                            </div>
+                            <small class="text-muted d-block mt-1">Customers will be notified to pay any extra cost logged here.</small>
+                            <span asp-validation-for="DamageCost" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <button type="submit" name="skip" value="true" class="btn btn-outline-secondary px-4">Skip & Verify Return</button>
+                            <button type="submit" class="btn btn-danger px-4 fw-bold">Generate Report & Charge Penalty</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

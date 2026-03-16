@@ -122,6 +122,41 @@ a:hover { color: var(--primary-dark); }
 }
 .btn-nav-logout:hover { background: rgba(239,68,68,0.3) !important; color: #fff !important; }
 
+/* === MOBILE NAVBAR FIXES === */
+@media (max-width: 991.98px) {
+    .vrms-navbar .navbar-collapse {
+        background: rgba(15,23,42,0.98);
+        padding: 1.5rem;
+        border-radius: var(--radius);
+        margin-top: 1rem;
+        border: 1px solid rgba(255,255,255,0.05);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .vrms-navbar .navbar-nav {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        gap: 0.2rem;
+    }
+    .vrms-navbar .nav-link {
+        padding: 0.6rem 1rem !important;
+        border-radius: var(--radius-sm);
+    }
+    .vrms-navbar .btn-nav-logout {
+        padding: 0.6rem 1rem !important;
+        border-radius: var(--radius-sm);
+        background: transparent !important;
+    }
+    .vrms-navbar .btn-nav-logout:hover {
+        background: rgba(239,68,68,0.15) !important;
+    }
+    .vrms-navbar .dropdown-menu {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        padding-left: 1rem;
+    }
+}
+
 /* === MAIN CONTENT === */
 .main-content { flex: 1; padding-top: 1rem; padding-bottom: 3rem; }
 
@@ -966,6 +1001,18 @@ a:hover { color: var(--primary-dark); }
 /* Admin Layout (no top navbar) */
 body.admin-layout {
     padding-top: 0;
+}
+
+/* Modal Focus and Scroll fixes */
+body.modal-open, html:has(body.modal-open) {
+    overflow: hidden !important;
+}
+
+.modal-backdrop.show {
+    opacity: 1 !important;
+    background-color: rgba(0, 0, 0, 0.4) !important;
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
 }
 
 body.admin-layout .vrms-navbar,

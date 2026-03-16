@@ -1,0 +1,118 @@
+@model vehicle_management_system_mvc.Models.DamageReport
+@{
+    ViewData["Title"] = $"Damage Invoice FR-{Model.Id}";
+}
+
+<div class="section-header animate-fade-in-up mt-5 text-center">
+    <h2><i class="bi bi-file-earmark-text me-2 text-danger"></i>Damage Penalty Invoice</h2>
+    <p>Invoice generated for your completed damage penalty payment.</p>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow border-0 animate-fade-in-up" id="invoiceCard" style="border-radius:var(--radius-lg);">
+            <!-- Invoice Header -->
+            <div class="card-header text-white px-4 py-4" style="background-color: #dc3545 !important; border-radius:var(--radius-lg) var(--radius-lg) 0 0;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <img src="~/images/logo.png" alt="RentWheels" style="height:80px;object-fit:contain;margin-right:14px; filter: brightness(0) invert(1);" />
+                        <div>
+                            <h5 class="mb-0 text-white" style="font-weight:700;">RentWheels</h5>
+                            <small class="text-white opacity-75">Damage Assessment Paid</small>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <h5 class="mb-1 text-white">INVOICE</h5>
+                        <span class="badge bg-white text-danger" style="font-size:0.85rem;">DMG-REP-@Model.Id</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body p-4">
+                <!-- Customer & Payment Info -->
+                <div class="row mb-4">
+                    <div class="col-sm-6">
+                        <h6 class="text-muted mb-2"><i class="bi bi-person me-1"></i>Billed To</h6>
+                        <strong>@(@Model.Booking?.Customer?.FullName ?? "Unknown")</strong><br />
+                        <span class="text-muted">@(@Model.Booking?.Customer?.Email)</span><br />
+                        <span class="text-muted">@(@Model.Booking?.Customer?.Phone)</span>
+                    </div>
+                    <div class="col-sm-6 text-sm-end">
+                        <h6 class="text-muted mb-2"><i class="bi bi-calendar me-1"></i>Report Details</h6>
+                        <strong>Report Date:</strong> @Model.CreatedAt.ToString("MMMM dd, yyyy")<br />
+                        <strong>Report ID:</strong> #@Model.Id<br />
+                    </div>
+                </div>
+
+                <hr />
+
+                <!-- Damage Details -->
+                <h6 class="mb-3 text-danger"><i class="bi bi-exclamation-triangle-fill me-1"></i>Damage Details</h6>
+                <div class="table-responsive mb-4">
+                    <table class="table table-borderless">
+                        <thead style="background:var(--light);border-radius:8px;">
+                            <tr>
+                                <th>Description</th>
+                                <th class="text-end">Penalty Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <strong>Vehicle: @(@Model.Booking?.Vehicle?.Brand) @(@Model.Booking?.Vehicle?.Model)</strong>
+                                    <br />
+                                    <small class="text-muted">
+                                        @(@Model.Booking?.Vehicle?.LicensePlate)
+                                    </small>
+                                    <br /><br />
+                                    <span class="text-dark"><strong>Infraction / Damage:</strong><br/> @Model.Description</span>
+                                </td>
+                                <td class="text-end align-middle font-size-lg fw-bold text-danger">₹@Model.DamageCost.ToString("N2")</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Total -->
+                <div class="d-flex justify-content-end">
+                    <div style="min-width:250px;">
+                        <hr class="my-2" />
+                        <div class="d-flex justify-content-between">
+                            <strong style="font-size:1.15rem;">Total Paid</strong>
+                            <strong style="font-size:1.15rem;color:var(--success);">₹@Model.DamageCost.ToString("N2")</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="mt-4" />
+
+                <!-- Status & Reference -->
+                <div class="row">
+                    <div class="col-sm-6">
+                        <span class="badge bg-success" style="font-size:0.9rem;padding:0.5rem 1rem;">
+                            <i class="bi bi-check-circle me-1"></i>Damage Penalty Settled
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="card-footer text-center text-muted py-3" style="background:var(--light);border-radius:0 0 var(--radius-lg) var(--radius-lg);">
+                <small>Thank you for settling your account! For any queries, contact support&#64;rentwheels.com</small>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="d-flex gap-2 mt-4 justify-content-center animate-fade-in-up pb-5">
+            <button onclick="window.print();" class="btn btn-outline-dark">
+                <i class="bi bi-printer me-1"></i>Print View
+            </button>
+            <a href="@Model.PdfUrl" target="_blank" class="btn btn-danger">
+                <i class="bi bi-file-earmark-pdf me-1"></i>Download PDF
+            </a>
+            <a asp-controller="Home" asp-action="Notifications" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Back
+            </a>
+        </div>
+    </div>
+</div>

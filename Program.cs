@@ -4,6 +4,9 @@ using Stripe;
 using System.Globalization;
 using vehicle_management_system_mvc.Data;
 using vehicle_management_system_mvc.Services;
+using QuestPDF.Infrastructure;
+
+QuestPDF.Settings.License = LicenseType.Community;
 
 var builder = WebApplication.CreateBuilder(args);
 

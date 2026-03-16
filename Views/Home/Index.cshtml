@@ -3,33 +3,235 @@
     ViewData["Tittle"] = "Home";
 }
 
-<div class="hero-section">
-    <div class="container">
-        <div class="hero-content">
-            <img src="~/images/logo.png" alt="RentWheels" class="hero-logo" />
-
-            <h1>Find Your Perfect <span class="gradient-text">Ride</span></h1>
-            <p>Premium vehicles at your fingertips. Book your dream car in seconds.</p>
-            <div class="hero-buttons">
+<div class="hero-driveonix">
+    <div class="hero-bg-text">Drive</div>
+    <div class="container-fluid px-4 px-xl-5 hero-container">
+        <!-- Left Side -->
+        <div class="hero-left">
+            <h1 class="hero-title">Your Journey,<br>Your Car,<br>Your Way</h1>
+            <p class="hero-desc">Premium vehicles at your fingertips. Discover a seamless rental process with transparent pricing and instant approvals tailored just for you.</p>
+            <div class="hero-action mt-4">
                 @if (User.Identity?.IsAuthenticated != true)
                 {
-                    <a asp-controller="Account" asp-action="Register" class="btn btn-hero btn-hero-primary me-2">
-                        <i class="bi bi-rocket-takeoff me-2"></i>Get Started
-                    </a>
-                    <a asp-controller="Account" asp-action="Login" class="btn btn-hero btn-hero-outline">
-                        <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
-                    </a>
+                    <a asp-controller="Account" asp-action="Register" class="btn-get-started">Get Started</a>
                 }
                 else
                 {
-                    <a asp-controller="Vehicles" asp-action="Index" class="btn btn-hero btn-hero-primary">
-                        <i class="bi bi-car-front me-2"></i>Browse All Vehicles
-                    </a>
+                    <a asp-controller="Vehicles" asp-action="Index" class="btn-get-started">Browse Vehicles</a>
                 }
             </div>
         </div>
+
+        <!-- Center Image -->
+        <div class="hero-center">
+            <!-- Using a classic blue Mercedes placeholder similar to the reference design -->
+            <img src="https://freepngimg.com/save/31599-mercedes-car-transparent-background/1000x386" style="filter: hue-rotate(180deg) saturate(3) brightness(1.1) drop-shadow(0 20px 30px rgba(0,0,0,0.3));" alt="Hero Car" class="hero-car-img" onerror="this.src='https://pngimg.com/uploads/mercedes/mercedes_PNG80135.png'" />
+        </div>
+
+        <!-- Right Side -->
+        <div class="hero-right">
+            <div class="hero-reviews d-flex flex-column align-items-lg-end text-lg-end mb-4">
+                <div class="review-avatars d-flex mb-2">
+                    <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User" />
+                    <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="User" />
+                    <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="User" />
+                </div>
+                <h4 class="fw-bold mb-1" style="font-size:1.1rem; color: #333;">12.5K People</h4>
+                <p class="text-muted mb-0" style="font-size: 0.75rem; line-height: 1.4; max-width: 200px;">Have already chosen us for their incredible journeys and smart drives.</p>
+            </div>
+            
+            <ul class="hero-features list-unstyled">
+                <li><i class="bi bi-arrow-right text-blue me-2 fw-bold"></i> Above And Beyond</li>
+                <li><i class="bi bi-arrow-right text-blue me-2 fw-bold"></i> The Glorious Speed</li>
+                <li><i class="bi bi-arrow-right text-blue me-2 fw-bold"></i> Ride Like Boss</li>
+                <li><i class="bi bi-arrow-right text-blue me-2 fw-bold"></i> Speed Up The Future</li>
+            </ul>
+        </div>
     </div>
 </div>
+
+<style>
+    .hero-driveonix {
+        background: transparent;
+        position: relative;
+        overflow: hidden;
+        padding: 9rem 0 6rem 0; /* Increased top/bottom padding to fix conflict */
+        margin-bottom: 4rem; /* Safe distance from below sections */
+        min-height: 85vh;
+        display: flex;
+        align-items: center;
+        margin-top: -60px; /* Pull up to integrate with navbar space */
+    }
+    
+    .hero-bg-text {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 26vw;
+        color: rgba(43, 115, 246, 0.03);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        font-weight: 900;
+        letter-spacing: -5px;
+        z-index: 0;
+        pointer-events: none;
+        user-select: none;
+    }
+
+    .hero-container {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        max-width: 1700px; /* Greatly expanded max-width to remove congestion */
+        margin: 0 auto;
+        width: 100%;
+    }
+
+    .hero-left {
+        flex: 1 1 350px;
+        max-width: 480px; /* Spaced out left column */
+        position: relative;
+        z-index: 6;
+    }
+    
+    .hero-title {
+        font-size: 4rem;
+        font-weight: 800;
+        color: #2b73f6;
+        line-height: 1.15;
+        margin-bottom: 1.2rem;
+        letter-spacing: -1px;
+    }
+
+    .hero-desc {
+        font-size: 1.05rem;
+        color: #555;
+        line-height: 1.7;
+        font-weight: 500;
+    }
+
+    .btn-get-started {
+        display: inline-block;
+        background-color: #2b73f6;
+        color: #fff;
+        font-weight: 600;
+        padding: 0.9rem 2.8rem;
+        border-radius: 50px;
+        text-decoration: none;
+        font-size: 1.05rem;
+        box-shadow: 0 10px 20px rgba(43, 115, 246, 0.3);
+        transition: all 0.3s ease;
+    }
+    .btn-get-started:hover {
+        background-color: #1d5ed8;
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 12px 25px rgba(43, 115, 246, 0.4);
+    }
+
+    .hero-center {
+        flex: 1 1 500px;
+        display: flex;
+        justify-content: center;
+        position: relative;
+        z-index: 5;
+        padding: 0 2rem;
+    }
+    
+    .hero-car-img {
+        width: 100%; /* Changed from 120% to prevent overlap conflicts */
+        max-width: 900px; /* Kept large but constrained */
+        height: auto;
+        transform: translateY(15px);
+    }
+
+    .hero-right {
+        flex: 1 1 300px;
+        max-width: 320px; /* Slightly wider right column */
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        z-index: 6;
+    }
+
+    .text-blue { color: #2b73f6 !important; }
+
+    .review-avatars img {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        margin-left: -12px;
+    }
+    .review-avatars img:first-child { margin-left: 0; }
+
+    .hero-features {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        width: 100%;
+        align-items: flex-end;
+    }
+    
+    .hero-features li {
+        background: #fff;
+        padding: 0.65rem 1.25rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #444;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.03);
+        display: inline-flex;
+        align-items: center;
+        transition: transform 0.2s;
+    }
+    
+    .hero-features li:hover {
+        transform: translateX(-5px);
+    }
+    
+    @@media (max-width: 1199px) {
+        .hero-title { font-size: 2.8rem; }
+        .hero-car-img { transform: scale(1); width: 100%; }
+        .hero-right { max-width: 200px; }
+    }
+    
+    @@media (max-width: 991px) {
+        .hero-container {
+            flex-direction: column;
+            text-align: center;
+            gap: 2rem;
+            padding-top: 2rem;
+        }
+        .hero-left {
+            align-items: center;
+            max-width: 100%;
+        }
+        .hero-right {
+            align-items: center;
+            max-width: 100%;
+            margin-top: 1rem;
+        }
+        .hero-reviews {
+            align-items: center !important;
+            text-align: center !important;
+        }
+        .hero-features {
+            align-items: center;
+        }
+        .hero-car-img {
+            max-width: 90%;
+            transform: translateY(0);
+        }
+        .hero-bg-text {
+            font-size: 35vw;
+        }
+    }
+</style>
 
 <!-- Stats Section -->
 <div class="container">

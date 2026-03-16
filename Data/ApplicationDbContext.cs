@@ -14,6 +14,7 @@ namespace vehicle_management_system_mvc.Data
         public DbSet<Vehicle> Vehicles => Set<Vehicle>();
         public DbSet<Booking> Bookings => Set<Booking>();
         public DbSet<Payment> Payments => Set<Payment>();
+        public DbSet<DamageReport> DamageReports => Set<DamageReport>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -51,6 +52,16 @@ namespace vehicle_management_system_mvc.Data
                 entity.HasOne(p => p.Booking)
                       .WithOne(b => b.Payment)
                       .HasForeignKey<Payment>(p => p.BookingId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<DamageReport>(entity =>
+            {
+                entity.Property(d => d.DamageCost).HasColumnType("decimal(18,2)");
+
+                entity.HasOne(d => d.Booking)
+                      .WithOne(b => b.DamageReport)
+                      .HasForeignKey<DamageReport>(d => d.BookingId)
                       .OnDelete(DeleteBehavior.Restrict);
             });
         }

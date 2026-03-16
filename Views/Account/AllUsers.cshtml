@@ -1,0 +1,98 @@
+@model List<vehicle_management_system_mvc.Models.User>
+@{
+    ViewData["Title"] = "Manage Customers";
+}
+
+<div class="animate-fade-in-up">
+    <div class="dashboard-header d-flex justify-content-between align-items-center mb-4 p-4 rounded-4 shadow-sm" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
+        <div>
+            <h2 class="fw-bold mb-1 text-white d-flex align-items-center gap-2">
+                <i class="bi bi-people-fill text-info"></i> Customer Management
+            </h2>
+            <p class="text-white-50 mb-0 small">Review customer profiles and verify driver licenses.</p>
+        </div>
+    </div>
+
+    <div class="vrms-table scroll-animate">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Customer Info</th>
+                        <th>Contact</th>
+                        <th>License Details</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model)
+                    {
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="user-avatar shadow-sm me-3 d-flex align-items-center justify-content-center text-white rounded-circle" style="width: 40px; height: 40px; font-size: 1.2rem; background: var(--gradient); flex-shrink: 0;">
+                                        @(user.FullName.Substring(0, 1).ToUpper())
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0 fw-bold">@user.FullName</h6>
+                                        <small class="text-muted">Joined @user.CreatedAt.ToString("MMM yyyy")</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div><i class="bi bi-envelope text-muted me-1"></i>@user.Email</div>
+                                <div><i class="bi bi-telephone text-muted me-1"></i>@user.Phone</div>
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(user.DriverLicenseNumber))
+                                {
+                                    <div class="fw-medium text-dark"><i class="bi bi-card-heading me-1 text-primary"></i>@user.DriverLicenseNumber</div>
+                                    <small class="text-muted">Exp: @(user.LicenseExpiryDate?.ToString("MMM dd, yyyy") ?? "N/A")</small>
+                                }
+                                else
+                                {
+                                    <span class="text-muted fst-italic">Incomplete Profile</span>
+                                }
+                            </td>
+                            <td>
+                                @if (string.IsNullOrEmpty(user.DriverLicenseNumber))
+                                {
+                                    <span class="badge bg-secondary">Profile Pending</span>
+                                }
+                                else if (user.IsVerified)
+                                {
+                                    <span class="badge bg-success"><i class="bi bi-shield-check me-1"></i>Verified</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i>Awaiting Verification</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="d-flex gap-2">
+                                    @if (!string.IsNullOrEmpty(user.IdProofUrl))
+                                    {
+                                        <a href="@user.IdProofUrl" target="_blank" class="btn btn-sm btn-outline-primary shadow-sm" title="View Document">
+                                            <i class="bi bi-image"></i> Document
+                                        </a>
+                                    }
+                                    
+                                    @if (!string.IsNullOrEmpty(user.DriverLicenseNumber) && !user.IsVerified)
+                                    {
+                                        <form asp-action="VerifyUser" asp-route-id="@user.Id" method="post" class="m-0">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-success shadow-sm" title="Verify Customer">
+                                                <i class="bi bi-check-circle"></i> Verify
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -112,14 +112,15 @@ else
                                             </button>
                                         </form>
                                     }
-                                    @if (booking.Status == BookingStatus.Approved)
+                                    @if (booking.Status == BookingStatus.Approved && booking.Payment != null && booking.Payment.Status == vehicle_management_system_mvc.Models.PaymentStatus.Completed)
                                     {
-                                        <form asp-action="Complete" asp-route-id="@booking.Id" method="post" class="d-inline">
-                                            @Html.AntiForgeryToken()
-                                            <button type="submit" class="btn btn-sm btn-info" title="Complete">
-                                                <i class="bi bi-check-circle"></i>
-                                            </button>
-                                        </form>
+                                        <button type="button" class="btn btn-sm btn-info text-white" title="Complete & Return Vehicle" data-bs-toggle="modal" data-bs-target="#completeModal-@booking.Id">
+                                            <i class="bi bi-check-circle"></i>
+                                        </button>
+                                    }
+                                    else if (booking.Status == BookingStatus.Approved && (booking.Payment == null || booking.Payment.Status != vehicle_management_system_mvc.Models.PaymentStatus.Completed))
+                                    {
+                                        <span class="badge bg-warning text-dark"><i class="bi bi-clock-history me-1"></i>Awaiting Payment</span>
                                     }
                                 </div>
                             </td>
@@ -129,4 +130,40 @@ else
             </table>
         </div>
     </div>
+
+    <!-- Modals (Rendered outside the table to prevent backdrop and z-index issues) -->
+    @foreach (var booking in Model)
+    {
+        @if (booking.Status == BookingStatus.Approved && booking.Payment != null && booking.Payment.Status == vehicle_management_system_mvc.Models.PaymentStatus.Completed)
+        {
+            <!-- Damage Check Modal -->
+            <div class="modal fade text-start" id="completeModal-@booking.Id" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true" style="z-index: 1055;">
+                <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
+                    <div class="modal-header bg-light border-0">
+                    <h5 class="modal-title fw-bold text-dark"><i class="bi bi-car-front-fill me-2 text-primary"></i>Vehicle Return Check</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-center p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-shield-exclamation text-warning" style="font-size: 3.5rem;"></i>
+                    </div>
+                    <h5 class="mb-2">Is there any damage to the vehicle?</h5>
+                    <p class="text-muted mb-0">Please confirm if the <strong>@booking.Vehicle.Brand @booking.Vehicle.Model</strong> was returned with any new damages.</p>
+                    </div>
+                    <div class="modal-footer bg-light border-0 d-flex justify-content-center gap-2">
+                    <form asp-action="CompleteWithoutDamage" asp-route-id="@booking.Id" method="post" class="m-0">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-success px-4 rounded-pill shadow-sm"><i class="bi bi-check-circle me-1"></i>No Damage</button>
+                    </form>
+                    <form asp-action="Complete" asp-route-id="@booking.Id" method="post" class="m-0">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-danger px-4 rounded-pill shadow-sm"><i class="bi bi-file-earmark-text me-1"></i>Yes, Report Damage</button>
+                    </form>
+                    </div>
+                </div>
+                </div>
+            </div>
+        }
+    }
 }

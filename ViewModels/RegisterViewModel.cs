@@ -11,7 +11,9 @@ namespace vehicle_management_system_mvc.ViewModels
         [Required, EmailAddress, StringLength(150)]
         public string Email { get; set; } = string.Empty;
 
-        [Required, Phone, StringLength(20)]
+        [Required(ErrorMessage = "Phone number is required.")]
+        [RegularExpression(@"^[0-9]{10}$", ErrorMessage = "Please enter a valid 10-digit phone number.")]
+        [StringLength(20)]
         [Display(Name = "Phone Number")]
         public string Phone { get; set; } = string.Empty;
 

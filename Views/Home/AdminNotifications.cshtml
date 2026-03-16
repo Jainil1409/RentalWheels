@@ -1,0 +1,231 @@
+@{
+    ViewData["Title"] = "Admin Notifications";
+    var pendingBookings = ViewBag.PendingBookings as List<vehicle_management_system_mvc.Models.Booking> ?? new List<vehicle_management_system_mvc.Models.Booking>();
+    var recentPayments = ViewBag.RecentPayments as List<vehicle_management_system_mvc.Models.Payment> ?? new List<vehicle_management_system_mvc.Models.Payment>();
+    var damagePayments = ViewBag.DamagePayments as List<vehicle_management_system_mvc.Models.DamageReport> ?? new List<vehicle_management_system_mvc.Models.DamageReport>();
+    var pendingVerifications = ViewBag.PendingVerifications as List<vehicle_management_system_mvc.Models.User> ?? new List<vehicle_management_system_mvc.Models.User>();
+}
+
+<div class="animate-fade-in-up">
+    <!-- Admin Dashboard Header -->
+    <div class="dashboard-header d-flex justify-content-between align-items-center mb-4 p-4 rounded-4 shadow-sm" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
+        <div>
+            <h2 class="fw-bold mb-1 text-white d-flex align-items-center gap-2">
+                <i class="bi bi-bell-fill text-warning"></i> Notifications & Activity Feed
+            </h2>
+            <p class="text-white-50 mb-0 small">Overview of user requests, latest payments, and resolved damage reports.</p>
+        </div>
+        <div class="d-none d-md-block">
+            <span class="badge bg-white text-dark rounded-pill py-2 px-3 shadow-sm">
+                <i class="bi bi-activity me-1 text-primary"></i> System Live
+            </span>
+        </div>
+    </div>
+    
+    <div class="card shadow-sm border-0 rounded-4 scroll-animate">
+        <div class="card-header bg-white border-bottom p-3">
+            <ul class="nav nav-pills gap-2 dropdown-menu-start" id="notificationTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active px-4 rounded-pill fw-medium d-flex align-items-center gap-2" id="kyc-tab" data-bs-toggle="pill" data-bs-target="#kyc-content" type="button" role="tab">
+                        <i class="bi bi-person-badge"></i> KYC Verifications
+                        @if (pendingVerifications.Any())
+                        {
+                            <span class="badge bg-danger rounded-pill">@pendingVerifications.Count</span>
+                        }
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link px-4 rounded-pill fw-medium d-flex align-items-center gap-2" id="bookings-tab" data-bs-toggle="pill" data-bs-target="#bookings-content" type="button" role="tab">
+                        <i class="bi bi-calendar-plus"></i> Booking Requests
+                        @if (pendingBookings.Any())
+                        {
+                            <span class="badge bg-danger rounded-pill">@pendingBookings.Count</span>
+                        }
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link px-4 rounded-pill fw-medium d-flex align-items-center gap-2" id="payments-tab" data-bs-toggle="pill" data-bs-target="#payments-content" type="button" role="tab">
+                        <i class="bi bi-credit-card-fill"></i> Recent Payments
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link px-4 rounded-pill fw-medium d-flex align-items-center gap-2" id="damage-tab" data-bs-toggle="pill" data-bs-target="#damage-content" type="button" role="tab">
+                        <i class="bi bi-shield-exclamation"></i> Damage Settlements
+                    </button>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="card-body p-0">
+            <div class="tab-content" id="notificationTabsContent">
+                
+                <!-- KYC Content -->
+                <div class="tab-pane fade show active" id="kyc-content" role="tabpanel" tabindex="0">
+                    @if (!pendingVerifications.Any())
+                    {
+                        <div class="p-5 text-center text-muted">
+                            <i class="bi bi-check-circle text-success fs-1 mb-3 d-block"></i>
+                            <h5 class="fw-bold">All caught up!</h5>
+                            <p>No pending customer verifications right now.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="list-group list-group-flush border-0">
+                            @foreach (var user in pendingVerifications)
+                            {
+                                <div class="list-group-item p-4 hover-lift-subtle">
+                                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm" style="width: 50px; height: 50px; flex-shrink: 0; font-size: 1.2rem;">
+                                                @(user.FullName.Substring(0, 1).ToUpper())
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-1 text-dark fw-bold fs-5">@user.FullName</h6>
+                                                <div class="text-muted">
+                                                    <span class="me-3"><i class="bi bi-envelope me-1"></i>@user.Email</span>
+                                                    <span><i class="bi bi-telephone me-1"></i>@user.Phone</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="text-end">
+                                            <a asp-controller="Account" asp-action="AllUsers" class="btn btn-info text-white shadow-sm rounded-pill fw-medium px-4">
+                                                <i class="bi bi-shield-check me-2"></i> Review & Verify
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <!-- Bookings Content -->
+                <div class="tab-pane fade" id="bookings-content" role="tabpanel" tabindex="0">
+                    @if (!pendingBookings.Any())
+                    {
+                        <div class="p-5 text-center text-muted">
+                            <i class="bi bi-calendar-check text-success fs-1 mb-3 d-block"></i>
+                            <h5 class="fw-bold">No Pending Requests</h5>
+                            <p>All booking requests have been processed.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="list-group list-group-flush border-0">
+                            @foreach (var p in pendingBookings)
+                            {
+                                <div class="list-group-item p-4 hover-lift-subtle">
+                                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                                        <div>
+                                            <div class="d-flex align-items-center gap-2 mb-2">
+                                                <h6 class="mb-0 text-dark fw-bold fs-5">@p.Customer.FullName</h6>
+                                                <span class="badge bg-warning text-dark px-2 py-1">Pending Approval</span>
+                                            </div>
+                                            <p class="mb-1 text-dark">Requested <strong class="text-primary">@p.Vehicle.Brand @p.Vehicle.Model</strong></p>
+                                            <small class="text-muted"><i class="bi bi-calendar-range me-1"></i> @p.StartDate.ToString("MMM dd, yyyy") — @p.EndDate.ToString("MMM dd, yyyy")</small>
+                                        </div>
+                                        <div>
+                                            <a asp-controller="Bookings" asp-action="AllBookings" class="btn btn-outline-dark rounded-pill px-4">
+                                                Go to Bookings <i class="bi bi-arrow-right ms-1"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <!-- Payments Content -->
+                <div class="tab-pane fade" id="payments-content" role="tabpanel" tabindex="0">
+                    @if (!recentPayments.Any())
+                    {
+                        <div class="p-5 text-center text-muted">
+                            <i class="bi bi-wallet2 text-secondary fs-1 mb-3 d-block"></i>
+                            <h5 class="fw-bold">No Payment History</h5>
+                            <p>Recent transactions will appear here.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="list-group list-group-flush border-0">
+                            @foreach (var p in recentPayments)
+                            {
+                                <div class="list-group-item p-4 bg-success-subtle bg-opacity-10 border-bottom">
+                                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                        <div>
+                                            <h6 class="mb-1 text-dark fw-bold fs-5">@p.Booking.Customer.FullName</h6>
+                                            <p class="mb-1 text-secondary">Rental Payment via <strong>@p.Method</strong> for Booking #@p.BookingId</p>
+                                            <small class="text-muted"><i class="bi bi-clock me-1"></i>@p.PaymentDate.ToString("MMM dd, yyyy HH:mm")</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <h4 class="fw-bold text-success mb-0">+₹@p.Amount.ToString("N0")</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <!-- Damage Content -->
+                <div class="tab-pane fade" id="damage-content" role="tabpanel" tabindex="0">
+                    @if (!damagePayments.Any())
+                    {
+                        <div class="p-5 text-center text-muted">
+                            <i class="bi bi-shield-check text-success fs-1 mb-3 d-block"></i>
+                            <h5 class="fw-bold">No Damage Reports</h5>
+                            <p>No settled damage reports found recently.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="list-group list-group-flush border-0">
+                            @foreach (var d in damagePayments)
+                            {
+                                <div class="list-group-item p-4 bg-danger-subtle bg-opacity-10 border-bottom">
+                                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                                        <div>
+                                            <h6 class="mb-1 text-dark fw-bold fs-5">@(@d.Booking?.Customer?.FullName ?? "Unknown")</h6>
+                                            <p class="mb-1 text-secondary">Damage Penalty for Booking #@d.BookingId</p>
+                                            <small class="text-muted"><i class="bi bi-file-earmark-pdf me-1"></i>Report ID: #@d.Id</small>
+                                        </div>
+                                        <div class="text-end d-flex align-items-center gap-4">
+                                            <h4 class="fw-bold text-danger mb-0">+₹@d.DamageCost.ToString("N0")</h4>
+                                            <a href="@d.PdfUrl" target="_blank" class="btn btn-outline-danger rounded-pill px-3">
+                                                <i class="bi bi-file-pdf me-1"></i> Invoice
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-lift-subtle {
+        transition: background-color 0.2s ease;
+    }
+    .hover-lift-subtle:hover {
+        background-color: #f8f9fa;
+    }
+    .nav-pills .nav-link {
+        color: #495057;
+        transition: all 0.3s ease;
+    }
+    .nav-pills .nav-link.active {
+        background-color: #0d6efd;
+        color: #fff;
+        box-shadow: 0 4px 6px rgba(13, 110, 253, 0.2);
+    }
+    .nav-pills .nav-link:not(.active):hover {
+        background-color: #e9ecef;
+    }
+</style>

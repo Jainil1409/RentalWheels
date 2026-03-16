@@ -40,7 +40,103 @@ namespace vehicle_management_system_mvc.Controllers
                 .Take(6)
                 .ToListAsync();
 
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+                if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int userId))
+                {
+                    // Find bookings that are Approved but don't have a completed payment yet
+                    var approvedBookings = await _context.Bookings
+                        .Include(b => b.Vehicle)
+                        .Where(b => b.CustomerId == userId 
+                            && b.Status == BookingStatus.Approved 
+                            && !_context.Payments.Any(p => p.BookingId == b.Id && p.Status == PaymentStatus.Completed))
+                        .ToListAsync();
+                        
+                    ViewBag.ApprovedBookingsToPay = approvedBookings;
+                }
+            }
+
             return View(vehicles);
+        }
+
+        public async Task<IActionResult> Notifications()
+        {
+            if (User.Identity?.IsAuthenticated != true || !User.IsInRole("Customer"))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+            {
+                return RedirectToAction("Index");
+            }
+
+            var currentUser = await _context.Users.FindAsync(userId);
+            ViewBag.CurrentUser = currentUser;
+
+            var approvedBookings = await _context.Bookings
+                .Include(b => b.Vehicle)
+                .Where(b => b.CustomerId == userId 
+                    && b.Status == BookingStatus.Approved 
+                    && !_context.Payments.Any(p => p.BookingId == b.Id && p.Status == PaymentStatus.Completed))
+                .OrderByDescending(b => b.CreatedAt)
+                .ToListAsync();
+                
+            var damageReports = await _context.DamageReports
+                .Include(dr => dr.Booking)
+                .ThenInclude(b => b!.Vehicle)
+                .Where(dr => dr.Booking != null && dr.Booking.CustomerId == userId && !dr.IsPaid)
+                .OrderByDescending(dr => dr.CreatedAt)
+                .ToListAsync();
+
+            ViewBag.DamageReports = damageReports;
+
+            return View(approvedBookings);
+        }
+
+        public async Task<IActionResult> AdminNotifications()
+        {
+            if (User.Identity?.IsAuthenticated != true || !User.IsInRole("Admin"))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var pendingBookings = await _context.Bookings
+                .Include(b => b.Customer)
+                .Include(b => b.Vehicle)
+                .Where(b => b.Status == BookingStatus.Pending)
+                .OrderByDescending(b => b.CreatedAt)
+                .ToListAsync();
+
+            var recentPayments = await _context.Payments
+                .Include(p => p.Booking)
+                .ThenInclude(b => b.Customer)
+                .Where(p => p.Status == PaymentStatus.Completed)
+                .OrderByDescending(p => p.PaymentDate)
+                .Take(10)
+                .ToListAsync();
+
+            var damagePayments = await _context.DamageReports
+                .Include(dr => dr.Booking)
+                .ThenInclude(b => b!.Customer)
+                .Where(dr => dr.IsPaid)
+                .OrderByDescending(dr => dr.CreatedAt)
+                .Take(10)
+                .ToListAsync();
+
+            var pendingVerifications = await _context.Users
+                .Where(u => u.Role == UserRole.Customer && !string.IsNullOrEmpty(u.DriverLicenseNumber) && !u.IsVerified)
+                .OrderByDescending(u => u.CreatedAt)
+                .ToListAsync();
+
+            ViewBag.PendingBookings = pendingBookings;
+            ViewBag.RecentPayments = recentPayments;
+            ViewBag.DamagePayments = damagePayments;
+            ViewBag.PendingVerifications = pendingVerifications;
+
+            return View();
         }
 
         public IActionResult Privacy()

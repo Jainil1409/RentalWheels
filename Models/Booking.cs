@@ -39,5 +39,6 @@ namespace vehicle_management_system_mvc.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public Payment? Payment { get; set; }
+        public DamageReport? DamageReport { get; set; }
     }
 }

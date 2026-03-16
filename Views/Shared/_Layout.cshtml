@@ -1,3 +1,6 @@
+@using System.Security.Claims
+@using vehicle_management_system_mvc.Models
+@inject vehicle_management_system_mvc.Data.ApplicationDbContext _context
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -181,30 +184,65 @@
 
             </ul>
 
-            <ul class="navbar-nav ms-auto">
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
 
               @if (User.Identity?.IsAuthenticated == true)
               {
-                <li class="nav-item d-flex align-items-center me-2">
-                  <span class="navbar-user-info">
+                int pendingPaymentCount = 0;
+                int kycNotificationCount = 0;
+                if (User.IsInRole("Customer"))
+                {
+                    var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                    if (int.TryParse(userIdStr, out int userId))
+                    {
+                        pendingPaymentCount = _context.Bookings.Count(b => b.CustomerId == userId
+                            && b.Status == BookingStatus.Approved
+                            && !_context.Payments.Any(p => p.BookingId == b.Id && p.Status == PaymentStatus.Completed));
+                            
+                        var currentUser = _context.Users.Find(userId);
+                        if (currentUser != null && string.IsNullOrEmpty(currentUser.DriverLicenseNumber) || (currentUser != null && !currentUser.IsVerified))
+                        {
+                            kycNotificationCount = 1;
+                        }
+                    }
+                }
+                
+                int totalUserNotifications = pendingPaymentCount + kycNotificationCount;
 
-                    <span class="user-avatar">
-                      @(User.Identity.Name?.Substring(0, 1).ToUpper())
+                @if (User.IsInRole("Customer"))
+                {
+                    <li class="nav-item">
+                        <a asp-controller="Home" asp-action="Notifications" class="nav-link d-flex align-items-center position-relative">
+                            <i class="bi bi-bell-fill me-2 fs-5"></i>
+                            <span class="d-lg-none">Notifications</span>
+                            @if (totalUserNotifications > 0)
+                            {
+                                <!-- Mobile Badge -->
+                                <span class="badge rounded-pill bg-danger ms-auto d-lg-none">@totalUserNotifications</span>
+                                <!-- Desktop Badge -->
+                                <span class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-danger d-none d-lg-block" style="margin-left: 24px; margin-top: 12px; font-size: 0.65rem;">
+                                    @totalUserNotifications
+                                </span>
+                            }
+                        </a>
+                    </li>
+                }
+
+                <li class="nav-item mt-2 mt-lg-0">
+                  <a asp-controller="Account" asp-action="Profile" class="nav-link d-flex align-items-center" style="color: rgba(255,255,255,0.9) !important; text-decoration: none;">
+                    <span class="user-avatar shadow-sm me-2 d-flex align-items-center justify-content-center text-white rounded-circle" style="width: 32px; height: 32px; font-size: 0.9rem; background: var(--gradient) !important;">
+                      @(User.Identity.Name?.Substring(0, 1).ToUpper() ?? "U")
                     </span>
-
-                    @User.Identity.Name
-
-                  </span>
+                    <span class="fw-medium">@User.Identity.Name</span>
+                  </a>
                 </li>
 
-                <li class="nav-item">
-                  <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                <li class="nav-item mt-3 mt-lg-0 ms-lg-2 d-flex align-items-center">
+                  <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
                     @Html.AntiForgeryToken()
-
-                    <button type="submit" class="btn btn-nav-logout btn-sm">
+                    <button type="submit" class="btn btn-nav-logout nav-link border-0" style="color: #ef4444 !important;">
                       <i class="bi bi-box-arrow-right me-1"></i>Logout
                     </button>
-
                   </form>
                 </li>
               }

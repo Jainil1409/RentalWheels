@@ -1,3 +1,17 @@
+@using Microsoft.EntityFrameworkCore
+@using vehicle_management_system_mvc.Data
+@using vehicle_management_system_mvc.Models
+@inject ApplicationDbContext _context
+
+@{
+    int pendingCount = 0;
+    try {
+        var pendingBookingsCount = await _context.Bookings.CountAsync(b => b.Status == BookingStatus.Pending);
+        var pendingVerificationsCount = await _context.Users.CountAsync(u => u.Role == UserRole.Customer && !u.IsVerified && !string.IsNullOrEmpty(u.DriverLicenseNumber));
+        pendingCount = pendingBookingsCount + pendingVerificationsCount;
+    } catch { }
+}
+
 @* Admin Sidebar - Modern Professional Design *@
 
 <aside class="admin-sidebar" id="adminSidebar">
@@ -32,6 +46,20 @@
             <a asp-controller="Home" asp-action="Index" class="sidebar-link @(currentPath == "/" || currentPath == "/home" || currentPath == "/home/index" ? "active" : "")">
                 <i class="bi bi-speedometer2"></i>
                 <span>Dashboard</span>
+            </a>
+            <a asp-controller="Home" asp-action="AdminNotifications" class="sidebar-link @(currentPath == "/home/adminnotifications" ? "active" : "") d-flex justify-content-between align-items-center w-100">
+                <div>
+                    <i class="bi bi-bell-fill"></i>
+                    <span>Notifications</span>
+                </div>
+                @if (pendingCount > 0)
+                {
+                    <span class="text-danger fw-bold ms-auto" style="font-size: 0.9rem;">@pendingCount</span>
+                }
+            </a>
+            <a asp-controller="Account" asp-action="AllUsers" class="sidebar-link @(currentPath == "/account/allusers" ? "active" : "")">
+                <i class="bi bi-people-fill"></i>
+                <span>Manage Customers</span>
             </a>
         </div>
 

@@ -1,0 +1,225 @@
+@model List<vehicle_management_system_mvc.Models.Booking>
+@{
+    ViewData["Title"] = "Notifications";
+    var currentUser = ViewBag.CurrentUser as vehicle_management_system_mvc.Models.User;
+    var damageReports = ViewBag.DamageReports as List<vehicle_management_system_mvc.Models.DamageReport>;
+    
+    bool isKycPending = currentUser != null && !string.IsNullOrEmpty(currentUser.DriverLicenseNumber) && !currentUser.IsVerified;
+    bool isProfileIncomplete = currentUser != null && string.IsNullOrEmpty(currentUser.DriverLicenseNumber);
+    int kycNotificationCount = (isKycPending || isProfileIncomplete) ? 1 : 0;
+    
+    int totalCount = (Model?.Count ?? 0) + (damageReports?.Count ?? 0) + kycNotificationCount;
+}
+
+<div class="container notification-container">
+    <div class="notification-header border-bottom pb-3 mb-4 d-flex justify-content-between align-items-end">
+        <div>
+            <h2 class="fw-bold mb-1 modern-title">Notifications</h2>
+            <p class="text-muted mb-0 small">Stay updated on your booking approvals and required actions.</p>
+        </div>
+        @if (totalCount > 0)
+        {
+            <span class="badge bg-primary rounded-pill px-3 py-2 fw-medium shadow-sm">@totalCount Pending Actions</span>
+        }
+    </div>
+    
+    @if (totalCount == 0)
+    {
+        <div class="empty-state text-center py-5 my-5">
+            <div class="empty-icon-wrapper mb-4 mx-auto">
+                <i class="bi bi-bell text-muted fs-1"></i>
+            </div>
+            <h5 class="fw-bold mb-2">You're all caught up!</h5>
+            <p class="text-muted mb-4">You have no pending notifications or actions required at the moment.</p>
+            <a asp-controller="Vehicles" asp-action="Index" class="btn btn-primary px-4 py-2 rounded-pill fw-medium btn-sm-hover">Browse Vehicles</a>
+        </div>
+    }
+    else
+    {
+        <div class="notification-list">
+            
+            @if (isProfileIncomplete)
+            {
+                <div class="notification-item bg-warning-subtle p-4 mb-3 rounded-4 shadow-sm border border-warning">
+                    <div class="row align-items-center g-4">
+                        <div class="col-auto">
+                            <div class="notification-icon bg-warning text-dark rounded-circle d-flex align-items-center justify-content-center">
+                                <i class="bi bi-exclamation-circle-fill fs-5"></i>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <h6 class="fw-bold text-dark mb-1">Profile Incomplete &mdash; Admin Verification Required</h6>
+                            <p class="text-dark mb-1" style="font-size: 0.95rem; line-height: 1.5;">
+                                You have not uploaded your driver's license yet. <strong class="text-danger">Admin verification of your license is mandatory</strong> before you are allowed to book any vehicles.
+                            </p>
+                        </div>
+                        <div class="col-md-3 col-12 text-md-end border-md-start border-warning ps-md-4">
+                            <a asp-controller="Account" asp-action="Profile" class="btn btn-dark px-4 py-2 rounded-pill fw-medium w-100">
+                                Complete Profile
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+            else if (isKycPending)
+            {
+                <div class="notification-item bg-info-subtle p-4 mb-3 rounded-4 shadow-sm border border-info">
+                    <div class="row align-items-center g-4">
+                        <div class="col-auto">
+                            <div class="notification-icon bg-info text-white rounded-circle d-flex align-items-center justify-content-center">
+                                <i class="bi bi-hourglass-split fs-5"></i>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <h6 class="fw-bold text-dark mb-1">Profile Under Review &mdash; Pending Admin Approval</h6>
+                            <p class="text-dark mb-1" style="font-size: 0.95rem; line-height: 1.5;">
+                                Thank you for submitting your documents. <strong class="text-primary">An administrator is currently reviewing your profile.</strong> You will be able to book vehicles as soon as your account is verified.
+                            </p>
+                        </div>
+                        <div class="col-md-3 col-12 text-md-end border-md-start border-info ps-md-4">
+                            <button class="btn btn-outline-info px-4 py-2 rounded-pill fw-medium w-100" disabled>
+                                In Progress
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @if (damageReports != null)
+            {
+                foreach (var report in damageReports)
+                {
+                    <div class="notification-item bg-danger-subtle p-4 mb-3 rounded-4 shadow-sm border border-danger">
+                        <div class="row align-items-center g-4">
+                            <div class="col-auto">
+                                <div class="notification-icon bg-danger text-white rounded-circle d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <h6 class="fw-bold text-danger mb-1">Damage Penalty &mdash; Payment Required</h6>
+                                <p class="text-dark mb-1" style="font-size: 0.95rem; line-height: 1.5;">
+                                    A damage report was generated for your recent rental of the <strong class="text-danger">@(@report.Booking?.Vehicle?.Brand) @(@report.Booking?.Vehicle?.Model)</strong>. 
+                                    <br/><small class="text-muted">Descrption: @report.Description</small>
+                                </p>
+                                <span class="text-danger small fw-bold"><i class="bi bi-file-earmark-pdf me-1"></i> <a href="@report.PdfUrl" target="_blank" class="text-danger text-decoration-underline">Download Invoice (PDF)</a></span>
+                            </div>
+                            <div class="col-md-3 col-12 text-md-end border-md-start border-danger ps-md-4">
+                                <div class="d-flex flex-md-column justify-content-between align-items-center align-items-md-end">
+                                    <div class="text-start text-md-end mb-md-3">
+                                        <span class="text-danger small d-block mb-1">Penalty Due</span>
+                                        <h5 class="fw-bold text-danger mb-0">₹@report.DamageCost.ToString("N2")</h5>
+                                    </div>
+                                    <a asp-controller="Payments" asp-action="PayDamage" asp-route-reportId="@report.Id" class="btn btn-danger px-4 py-2 rounded-pill fw-medium btn-pay">
+                                        Pay Penalty
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+
+            @if (Model != null)
+            {
+                foreach (var booking in Model)
+            {
+                <div class="notification-item bg-white p-4 mb-3 rounded-4 shadow-sm border border-light">
+                    <div class="row align-items-center g-4">
+                        <div class="col-auto">
+                            <div class="notification-icon bg-success-subtle text-success rounded-circle d-flex align-items-center justify-content-center">
+                                <i class="bi bi-check-circle-fill fs-5"></i>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <h6 class="fw-bold mb-1">Booking Approved &mdash; Payment Required</h6>
+                            <p class="text-secondary mb-1" style="font-size: 0.95rem; line-height: 1.5;">
+                                Your request for the <strong class="text-dark">@booking.Vehicle.Brand @booking.Vehicle.Model</strong> 
+                                (<span class="text-muted">@booking.StartDate.ToString("MMM dd") - @booking.EndDate.ToString("MMM dd, yyyy")</span>) 
+                                is approved. Please complete your payment to confirm the reservation.
+                            </p>
+                            <span class="text-muted small"><i class="bi bi-clock me-1"></i> Awaiting Action</span>
+                        </div>
+                        <div class="col-md-3 col-12 text-md-end border-md-start ps-md-4">
+                            <div class="d-flex flex-md-column justify-content-between align-items-center align-items-md-end">
+                                <div class="text-start text-md-end mb-md-3">
+                                    <span class="text-muted small d-block mb-1">Total Due</span>
+                                    <h5 class="fw-bold text-dark mb-0">₹@booking.TotalCost.ToString("N2")</h5>
+                                </div>
+                                <a asp-controller="Payments" asp-action="Create" asp-route-bookingId="@booking.Id" class="btn btn-dark px-4 py-2 rounded-pill fw-medium btn-pay">
+                                    Pay Now
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            }
+        </div>
+    }
+</div>
+
+<style>
+    .notification-container {
+        margin-top: 40px;
+        min-height: 70vh;
+        max-width: 900px; /* Constrain width for a sleek inbox feel */
+    }
+
+    .modern-title {
+        color: #1a1a1a;
+        letter-spacing: -0.5px;
+    }
+
+    .empty-icon-wrapper {
+        width: 80px;
+        height: 80px;
+        background-color: #f8f9fa;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .notification-item {
+        transition: all 0.2s ease-in-out;
+    }
+
+    .notification-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.08)!important;
+        border-color: #e9ecef !important;
+    }
+
+    .notification-icon {
+        width: 48px;
+        height: 48px;
+    }
+
+    .bg-success-subtle {
+        background-color: #d1e7dd;
+    }
+
+    .btn-sm-hover:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.2);
+    }
+
+    .btn-pay {
+        transition: all 0.2s ease;
+        font-size: 0.9rem;
+    }
+
+    .btn-pay:hover {
+        background-color: #2b73f6; /* Matching your brand blue */
+        border-color: #2b73f6;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(43, 115, 246, 0.3);
+    }
+
+    @@media (min-width: 768px) {
+        .border-md-start {
+            border-left: 1px solid #dee2e6!important;
+        }
+    }
+</style>

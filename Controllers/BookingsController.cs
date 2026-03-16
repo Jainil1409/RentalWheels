@@ -6,6 +6,10 @@ using vehicle_management_system_mvc.Data;
 using vehicle_management_system_mvc.Models;
 using vehicle_management_system_mvc.ViewModels;
 
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
+
 namespace vehicle_management_system_mvc.Controllers
 {
     [Authorize]
@@ -24,6 +28,19 @@ namespace vehicle_management_system_mvc.Controllers
         [Authorize(Roles = "Customer")]
         public async Task<IActionResult> Create(int vehicleId)
         {
+            var currentUser = await _context.Users.FindAsync(GetUserId());
+            if (string.IsNullOrEmpty(currentUser?.DriverLicenseNumber) || string.IsNullOrEmpty(currentUser?.IdProofUrl))
+            {
+                TempData["Warning"] = "Please complete your driver profile and upload your license image before booking a vehicle.";
+                return RedirectToAction("Profile", "Account", new { returnUrl = Url.Action("Create", "Bookings", new { vehicleId = vehicleId }) });
+            }
+            
+            if (!currentUser.IsVerified)
+            {
+                TempData["Warning"] = "Your KYC profile is under review. You cannot book vehicles until the Admin verifies your documents.";
+                return RedirectToAction("Profile", "Account");
+            }
+
             var vehicle = await _context.Vehicles.FindAsync(vehicleId);
             if (vehicle == null || !vehicle.IsAvailable) return NotFound();
 
@@ -43,6 +60,19 @@ namespace vehicle_management_system_mvc.Controllers
         [Authorize(Roles = "Customer")]
         public async Task<IActionResult> Create(BookingCreateViewModel model)
         {
+            var currentUser = await _context.Users.FindAsync(GetUserId());
+            if (string.IsNullOrEmpty(currentUser?.DriverLicenseNumber) || string.IsNullOrEmpty(currentUser?.IdProofUrl))
+            {
+                TempData["Warning"] = "Please complete your driver profile and upload your license image first.";
+                return RedirectToAction("Profile", "Account", new { returnUrl = Url.Action("Create", "Bookings", new { vehicleId = model.VehicleId }) });
+            }
+            
+            if (!currentUser.IsVerified)
+            {
+                TempData["Warning"] = "Your KYC profile is under review. You cannot book vehicles until the Admin verifies your documents.";
+                return RedirectToAction("Profile", "Account");
+            }
+
             var vehicle = await _context.Vehicles.FindAsync(model.VehicleId);
             if (vehicle == null || !vehicle.IsAvailable)
             {
@@ -147,17 +177,147 @@ namespace vehicle_management_system_mvc.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Complete(int id)
+        public IActionResult Complete(int id)
+        {
+            // Redirect to DamageReport generation
+            return RedirectToAction(nameof(DamageReport), new { id = id });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> CompleteWithoutDamage(int id)
         {
             var booking = await _context.Bookings.Include(b => b.Vehicle).FirstOrDefaultAsync(b => b.Id == id);
             if (booking == null) return NotFound();
 
             booking.Status = BookingStatus.Completed;
             booking.Vehicle.IsAvailable = true;
+            
             await _context.SaveChangesAsync();
+            TempData["Success"] = "Rental completed cleanly with no damage. Vehicle is now available.";
 
-            TempData["Success"] = "Rental marked as completed. Vehicle is now available.";
             return RedirectToAction(nameof(AllBookings));
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DamageReport(int id)
+        {
+            var booking = await _context.Bookings.FindAsync(id);
+            if (booking == null) return NotFound();
+
+            var newReport = new DamageReport { BookingId = id, DamageCost = 0 };
+            return View(newReport);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GenerateDamageReport(DamageReport model, bool skip = false)
+        {
+            var booking = await _context.Bookings.Include(b => b.Vehicle).FirstOrDefaultAsync(b => b.Id == model.BookingId);
+            if (booking == null) return NotFound();
+
+            // Mark booking as completed and vehicle available
+            booking.Status = BookingStatus.Completed;
+            booking.Vehicle.IsAvailable = true;
+
+            if (!skip && model.DamageCost > 0)
+            {
+                var report = new DamageReport
+                {
+                    BookingId = model.BookingId,
+                    Description = model.Description ?? "No specific details provided",
+                    DamageCost = model.DamageCost,
+                    IsPaid = false,
+                    CreatedAt = DateTime.UtcNow,
+                    PdfUrl = "" // Updated after save
+                };
+
+                _context.DamageReports.Add(report);
+                await _context.SaveChangesAsync();
+                
+                report.PdfUrl = $"/Bookings/DownloadDamagePdf/{report.Id}";
+                await _context.SaveChangesAsync();
+
+                TempData["Success"] = $"Damage report generated!. Cost: ₹{model.DamageCost:N2}. Vehicle is now available.";
+            }
+            else
+            {
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Rental completed cleanly with no extra damage charges. Vehicle is now available.";
+            }
+
+            return RedirectToAction(nameof(AllBookings));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> DownloadDamagePdf(int id)
+        {
+            var report = await _context.DamageReports
+                .Include(r => r.Booking)
+                .ThenInclude(b => b!.Vehicle)
+                .Include(r => r.Booking!.Customer)
+                .FirstOrDefaultAsync(r => r.Id == id);
+
+            if (report == null) return NotFound();
+
+            var document = Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.A4);
+                    page.Margin(2, Unit.Centimetre);
+                    page.PageColor(Colors.White);
+                    page.DefaultTextStyle(x => x.FontSize(12));
+
+                    page.Header().Element(compose =>
+                    {
+                        compose.Row(row =>
+                        {
+                            row.RelativeItem().Column(col =>
+                            {
+                                col.Item().Text("RentWheels Damage Report").FontSize(20).SemiBold().FontColor(Colors.Red.Medium);
+                                col.Item().Text($"Report ID: {report.Id}");
+                                col.Item().Text($"Date: {report.CreatedAt:MMM dd, yyyy}");
+                            });
+                        });
+                    });
+
+                    page.Content().Element(compose =>
+                    {
+                        compose.PaddingVertical(1, Unit.Centimetre).Column(column =>
+                        {
+                            column.Item().Text("Customer Details").SemiBold();
+                            column.Item().Text($"Name: {report.Booking?.Customer?.FullName}");
+                            column.Item().Text($"Email: {report.Booking?.Customer?.Email}");
+
+                            column.Item().PaddingTop(10).Text("Vehicle Details").SemiBold();
+                            column.Item().Text($"Vehicle: {report.Booking?.Vehicle?.Brand} {report.Booking?.Vehicle?.Model}");
+                            column.Item().Text($"License Plate: {report.Booking?.Vehicle?.LicensePlate}");
+
+                            column.Item().PaddingTop(10).Text("Damage Details").SemiBold();
+                            column.Item().Text(report.Description);
+
+                            column.Item().PaddingTop(20).Text($"Estimated Cost: Rs. {report.DamageCost:N2}").FontSize(16).SemiBold().FontColor(Colors.Red.Medium);
+                            
+                            column.Item().PaddingTop(10).Text($"Payment Status: {(report.IsPaid ? "PAID" : "PENDING")}").Bold();
+                        });
+                    });
+
+                    page.Footer().AlignCenter().Text(x =>
+                    {
+                        x.Span("Page ");
+                        x.CurrentPageNumber();
+                        x.Span(" of ");
+                        x.TotalPages();
+                    });
+                });
+            });
+
+            var pdfBytes = document.GeneratePdf();
+            return File(pdfBytes, "application/pdf", $"DamageReport_{report.Id}.pdf");
         }
 
         [HttpPost]

@@ -462,7 +462,7 @@
             <div class="bv-form-inner">
                 <div class="bv-form-section-title">Select Travel Dates</div>
 
-                <form asp-action="Create" method="post">
+                <form id="bookingForm" asp-action="Create" method="post">
                     <input type="hidden" asp-for="VehicleId" />
 
                     <div asp-validation-summary="All" class="text-danger mb-3 small"></div>
@@ -498,7 +498,7 @@
                     <div class="bv-divider"></div>
 
                     <div class="bv-btn-row">
-                        <button type="submit" class="bv-btn-confirm">
+                        <button type="button" class="bv-btn-confirm" data-bs-toggle="modal" data-bs-target="#tncModal">
                             <i class="bi bi-check-circle"></i> Confirm Booking
                         </button>
                         <a asp-controller="Vehicles"
@@ -565,6 +565,68 @@
 
 </div>
 
+<!-- Animated & Lock-Focused T&C Modal -->
+<div class="modal fade" id="tncModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="tncModalLabel" aria-hidden="true" style="backdrop-filter: blur(5px);">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden; transform: scale(0.95); opacity: 0; transition: transform 0.3s ease-out, opacity 0.3s ease-out;" id="tncModalContent">
+            
+            <div class="modal-header bg-white border-bottom">
+                <h5 class="modal-title fw-bold" id="tncModalLabel" style="color: #2b2b2b;">
+                    <i class="bi bi-file-earmark-text text-primary me-2"></i> Terms & Conditions
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <div class="modal-body" style="background-color: #f8f9fa; padding: 2rem;">
+                <p class="text-muted small mb-4">
+                    Please read the following terms carefully before confirming your reservation. You must agree to these terms to proceed.
+                </p>
+
+                <div class="bg-white p-4 rounded border" style="max-height: 250px; overflow-y: auto;">
+                    <h6 class="fw-bold text-dark">1. Vehicle Liability & Condition</h6>
+                    <p class="small text-muted mb-3">
+                        The vehicle must be returned in the same condition it was rented. You are responsible for any damages, scratches, or missing equipment resulting from misuse during the rental period. Inspection will occur upon return, and any damages will be charged to the registered payment method.
+                    </p>
+
+                    <h6 class="fw-bold text-dark">2. Fuel Policy (Full-to-Full)</h6>
+                    <p class="small text-muted mb-3">
+                        The vehicle is supplied with a full tank of fuel. It must be returned with a full tank. Failure to do so will result in a refueling fee equal to the cost of the missing fuel plus a ₹500 service charge.
+                    </p>
+
+                    <h6 class="fw-bold text-dark">3. Mileage Limits</h6>
+                    <p class="small text-muted mb-3">
+                        Your booking includes a standard limit of 250 km per day. Any additional mileage driven will be charged at ₹15 per kilometer upon return.
+                    </p>
+
+                    <h6 class="fw-bold text-dark">4. Traffic Violations & Tolls</h6>
+                    <p class="small text-muted mb-3">
+                        The renter accepts full liability for all traffic fines, speeding tickets, tolls, and parking citations incurred during the rental duration. Administration fees may apply if the company is forced to process these payments on your behalf.
+                    </p>
+
+                    <h6 class="fw-bold text-dark">5. Cleaning & Smoking Policy</h6>
+                    <p class="small text-muted mb-0">
+                        Smoking inside the vehicle is strictly prohibited. Vehicles returned with excessively dirty interiors, persistent odors, or trash will be subject to a strict ₹2,000 deep cleaning penalty.
+                    </p>
+                </div>
+
+                <div class="mt-4 p-3 bg-white rounded border border-primary border-opacity-25">
+                    <label for="agreeInput" class="form-label fw-bold mb-2 text-dark">
+                        Type <span class="badge bg-primary">I AGREE</span> below to accept these terms:
+                    </label>
+                    <input type="text" id="agreeInput" class="form-control form-control-lg border-opacity-50" 
+                           placeholder="Type here..." autocomplete="off">
+                </div>
+            </div>
+            
+            <div class="modal-footer bg-white border-top">
+                <button type="button" class="btn btn-light border fw-semibold" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" id="finalSubmitBtn" class="btn btn-primary fw-semibold px-4" disabled>
+                    Complete Booking
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
@@ -606,5 +668,59 @@
             const e = document.getElementById('bvEndDate').value;
             if (s || e) bvCalcTotal();
         })();
+
+        // Terms & Conditions Modal Logic
+        const agreeInput = document.getElementById('agreeInput');
+        const finalSubmitBtn = document.getElementById('finalSubmitBtn');
+        const tncModal = document.getElementById('tncModal');
+        const tncModalContent = document.getElementById('tncModalContent');
+
+        // Animation triggers
+        tncModal.addEventListener('show.bs.modal', function () {
+            // Calculate scrollbar width to prevent screen jump
+            const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+            document.body.style.paddingRight = scrollbarWidth + 'px';
+
+            tncModalContent.style.transform = 'scale(1)';
+            tncModalContent.style.opacity = '1';
+            agreeInput.value = ''; // Reset on open
+            agreeInput.classList.remove('is-valid');
+            finalSubmitBtn.disabled = true;
+            
+            // Prevent background scrolling completely
+            document.body.style.overflow = 'hidden';
+            document.documentElement.style.overflow = 'hidden';
+        });
+
+        tncModal.addEventListener('hide.bs.modal', function () {
+            tncModalContent.style.transform = 'scale(0.95)';
+            tncModalContent.style.opacity = '0';
+            
+            // Restore background scrolling and layout padding
+            document.body.style.paddingRight = '';
+            document.body.style.overflow = '';
+            document.documentElement.style.overflow = '';
+        });
+
+        // Focus & verification
+        tncModal.addEventListener('shown.bs.modal', function () {
+            agreeInput.focus();
+        });
+
+        agreeInput.addEventListener('input', function (e) {
+            const val = e.target.value.trim().toLowerCase();
+            if (val === 'i agree') {
+                this.classList.add('is-valid');
+                finalSubmitBtn.disabled = false;
+            } else {
+                this.classList.remove('is-valid');
+                finalSubmitBtn.disabled = true;
+            }
+        });
+
+        finalSubmitBtn.addEventListener('click', function () {
+            document.getElementById('bookingForm').submit();
+        });
+
     </script>
 }

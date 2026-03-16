@@ -39,204 +39,229 @@
     };
 }
 
-<nav aria-label="breadcrumb" class="animate-fade-in-down">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index"><i class="bi bi-house me-1"></i>Home</a></li>
-        <li class="breadcrumb-item"><a asp-action="Index">Vehicles</a></li>
-        <li class="breadcrumb-item active">@Model.Brand @Model.Model</li>
-    </ol>
-</nav>
+<div class="professional-details-wrapper">
+    <nav aria-label="breadcrumb" class="py-3">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none text-muted"><i class="bi bi-house me-1"></i>Home</a></li>
+            <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none text-muted">Fleet</a></li>
+            <li class="breadcrumb-item active fw-bold text-dark">@Model.Brand @Model.Model</li>
+        </ol>
+    </nav>
 
-<!-- Hero Image Section -->
-<div class="vd-hero animate-fade-in-up">
-    <div class="vd-hero-img">
-        @if (!string.IsNullOrEmpty(Model.ImageUrl))
-        {
-            <img src="@Model.ImageUrl" alt="@Model.Brand @Model.Model" />
-        }
-        else
-        {
-            <div class="detail-img-placeholder vehicle-img-placeholder @Model.Type.ToString().ToLower()" style="height:100%;border-radius:0;">
-                <i class="bi bi-car-front-fill"></i>
-            </div>
-        }
-        <div class="vd-hero-overlay">
-            <div class="vd-hero-badges">
-                <span class="vd-type-badge">@Model.Type</span>
-                @if (Model.IsAvailable)
+    <div class="row align-items-stretch mb-5 g-4 g-lg-5">
+        <!-- Left: Image Presentation -->
+        <div class="col-lg-7">
+            <div class="car-showcase-box h-100 placeholder-glow position-relative" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 20px; overflow: hidden; min-height: 400px; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 40px rgba(0,0,0,0.02);">
+                <div class="showcase-bg-text position-absolute w-100 text-center text-uppercase" style="font-size: 8rem; font-weight: 900; color: rgba(0,0,0,0.03); top: 50%; transform: translateY(-50%); z-index: 1; letter-spacing: -2px;">
+                    @Model.Brand
+                </div>
+                <!-- Status Badge -->
+                <div class="position-absolute top-0 start-0 m-4 z-3">
+                    @if (Model.IsAvailable)
+                    {
+                        <span class="badge bg-success bg-opacity-25 text-success px-3 py-2 rounded-pill fw-bold border border-success border-opacity-25">
+                            <i class="bi bi-circle-fill me-1 small"></i> Available Now
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger bg-opacity-25 text-danger px-3 py-2 rounded-pill fw-bold border border-danger border-opacity-25">
+                            <i class="bi bi-dash-circle-fill me-1 small"></i> Currently Booked
+                        </span>
+                    }
+                </div>
+                <div class="position-absolute top-0 end-0 m-4 z-3">
+                    <span class="badge bg-dark px-3 py-2 rounded-pill text-uppercase letter-spacing-1">@Model.Type</span>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.ImageUrl))
                 {
-                    <span class="vd-status-badge available"><i class="bi bi-check-circle-fill me-1"></i>Available</span>
+                    <img src="@Model.ImageUrl" alt="@Model.Brand @Model.Model" class="img-fluid position-relative z-2" style="max-height: 85%; max-width: 90%; object-fit: contain; filter: drop-shadow(0 20px 25px rgba(0,0,0,0.2));" />
                 }
                 else
                 {
-                    <span class="vd-status-badge unavailable"><i class="bi bi-x-circle-fill me-1"></i>Unavailable</span>
+                    <i class="bi bi-car-front-fill position-relative z-2 text-secondary" style="font-size: 8rem; opacity: 0.5;"></i>
                 }
             </div>
-            <div class="vd-hero-title">
-                <h1>@Model.Brand @Model.Model</h1>
-                <span class="vd-hero-year"><i class="bi bi-calendar3 me-1"></i>@Model.Year</span>
+        </div>
+
+        <!-- Right: Primary Info & Booking Card -->
+        <div class="col-lg-5">
+            <div class="booking-card h-100 p-4 p-xl-5 bg-white border border-light shadow-sm d-flex flex-column" style="border-radius: 20px;">
+                <div class="brand-eyebrow text-primary fw-bold text-uppercase tracking-wider mb-1" style="font-size: 0.85rem; letter-spacing: 2px;">
+                    @Model.Year Edition
+                </div>
+                <h1 class="display-5 fw-black mb-3 text-dark" style="font-weight: 800; letter-spacing: -1px;">
+                    @Model.Brand <br />
+                    <span class="text-secondary" style="font-weight: 300;">@Model.Model</span>
+                </h1>
+
+                <div class="price-block mb-4 pb-4 border-bottom">
+                    <div class="d-flex align-items-baseline">
+                        <span class="fs-1 fw-bold text-dark me-2">₹@Model.PricePerDay.ToString("N0")</span>
+                        <span class="text-muted fw-medium">/ day</span>
+                    </div>
+                    <small class="text-success fw-medium"><i class="bi bi-check2-all me-1"></i>Taxes & insurance included</small>
+                </div>
+
+                <div class="quick-specs-grid row g-3 mb-auto">
+                    <div class="col-6">
+                        <div class="d-flex align-items-center">
+                            <div class="spec-icon-box bg-light rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 45px; height: 45px;">
+                                <i class="bi bi-car-front text-dark fs-5"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block lh-1">Body Type</small>
+                                <strong class="text-dark">@Model.Type</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="d-flex align-items-center">
+                            <div class="spec-icon-box bg-light rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 45px; height: 45px;">
+                                <i class="bi bi-gear-wide-connected text-dark fs-5"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block lh-1">Transmission</small>
+                                <strong class="text-dark">Auto</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="d-flex align-items-center">
+                            <div class="spec-icon-box bg-light rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 45px; height: 45px;">
+                                <i class="bi bi-fuel-pump text-dark fs-5"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block lh-1">Fuel Type</small>
+                                <strong class="text-dark">Petrol/Hybrid</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="d-flex align-items-center">
+                            <div class="spec-icon-box bg-light rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 45px; height: 45px;">
+                                <i class="bi bi-person-hearts text-dark fs-5"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block lh-1">Seats</small>
+                                <strong class="text-dark">5 Adults</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-buttons mt-5">
+                    @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Customer") && Model.IsAvailable)
+                    {
+                        <a asp-controller="Bookings" asp-action="Create" asp-route-vehicleId="@Model.Id" class="btn btn-dark w-100 py-3 rounded-3 fw-bold shadow-sm hover-lift text-uppercase" style="letter-spacing: 1px;">
+                            Reserve This Vehicle <i class="bi bi-arrow-right ms-2 hide-on-hover"></i>
+                        </a>
+                    }
+                    else if (!Model.IsAvailable)
+                    {
+                        <button class="btn btn-secondary w-100 py-3 rounded-3 fw-bold text-uppercase" style="letter-spacing: 1px;" disabled>
+                            Currently Unavailable
+                        </button>
+                    }
+                    else if (User.Identity?.IsAuthenticated != true)
+                    {
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-dark w-100 py-3 rounded-3 fw-bold text-uppercase hover-lift">
+                            Login to Book
+                        </a>
+                    }
+
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <div class="d-flex gap-2 mt-3">
+                            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-warning flex-fill py-2 rounded-3 fw-bold">Edit</a>
+                            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger flex-fill py-2 rounded-3 fw-bold">Delete</a>
+                        </div>
+                    }
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="row g-4 mt-1">
-    <!-- Left Column: Details -->
-    <div class="col-lg-8 animate-fade-in-left">
-
-        <!-- Quick Specs Bar -->
-        <div class="vd-specs-bar">
-            <div class="vd-spec-item">
-                <i class="bi bi-car-front-fill"></i>
-                <div>
-                    <span class="vd-spec-label">Type</span>
-                    <strong>@Model.Type</strong>
-                </div>
-            </div>
-            <div class="vd-spec-item">
-                <i class="bi bi-calendar3"></i>
-                <div>
-                    <span class="vd-spec-label">Year</span>
-                    <strong>@Model.Year</strong>
-                </div>
-            </div>
-            <div class="vd-spec-item">
-                <i class="bi bi-card-text"></i>
-                <div>
-                    <span class="vd-spec-label">License</span>
-                    <strong>@(Model.LicensePlate ?? "N/A")</strong>
-                </div>
-            </div>
-            <div class="vd-spec-item">
-                <i class="bi bi-gear-wide-connected"></i>
-                <div>
-                    <span class="vd-spec-label">Transmission</span>
-                    <strong>Automatic</strong>
-                </div>
-            </div>
-        </div>
-
-        <!-- About This Vehicle -->
-        <div class="vd-section">
-            <h5 class="vd-section-title"><i class="bi bi-info-circle-fill me-2"></i>About This Vehicle</h5>
+    <!-- Bottom Section: Info & Features -->
+    <div class="row g-5">
+        <div class="col-lg-8">
+            <h4 class="fw-bold mb-4 border-bottom pb-2">Vehicle Overview</h4>
             @if (!string.IsNullOrEmpty(Model.Description))
             {
-                <p class="vd-description">@Model.Description</p>
+                <p class="text-muted fs-5 lh-base mb-5" style="max-width: 90%;">@Model.Description</p>
             }
             else
             {
-                <p class="vd-description">
-                    The @Model.Year @Model.Brand @Model.Model is a premium @Model.Type.ToString().ToLower() designed for comfort and performance.
-                    Ideal for both city commutes and long road trips, this vehicle offers a perfect blend of style, safety, and reliability.
+                <p class="text-muted fs-5 lh-base mb-5" style="max-width: 90%;">
+                    Experience the road like never before in the @Model.Year @Model.Brand @Model.Model. Designed with precision, 
+                    this premium @Model.Type.ToString().ToLower() delivers a dynamic driving experience while offering maximum comfort. Whether 
+                    navigating city streets or cruising highways, its advanced engineering and luxurious interior make every journey extraordinary.
                 </p>
             }
-            <p class="vd-description-sub">
-                This vehicle is part of our curated rental fleet, maintained to the highest standards.
-                Every rental includes thorough inspection and sanitization before handover.
-            </p>
-        </div>
 
-        <!-- Feature Highlights -->
-        <div class="vd-section">
-            <h5 class="vd-section-title"><i class="bi bi-star-fill me-2"></i>Feature Highlights</h5>
-            <div class="vd-features-grid">
+            <h4 class="fw-bold mb-4 border-bottom pb-2">Premium Features</h4>
+            <div class="row g-4 mb-5">
                 @foreach (var h in highlights)
                 {
-                    <div class="vd-feature-item">
-                        <div class="vd-feature-icon"><i class="bi @h.Icon"></i></div>
-                        <span>@h.Label</span>
-                    </div>
-                }
-            </div>
-        </div>
-
-        <!-- Rental Perks -->
-        <div class="vd-section">
-            <h5 class="vd-section-title"><i class="bi bi-gift-fill me-2"></i>What's Included</h5>
-            <div class="vd-perks-grid">
-                @foreach (var perk in perks)
-                {
-                    <div class="vd-perk-card">
-                        <div class="vd-perk-icon"><i class="bi @perk.Item1"></i></div>
-                        <div>
-                            <strong>@perk.Item2</strong>
-                            <small>@perk.Item3</small>
+                    <div class="col-sm-6 col-md-4">
+                        <div class="p-3 bg-light rounded-3 d-flex align-items-center h-100 feature-hover">
+                            <i class="bi @h.Icon text-primary fs-4 me-3"></i>
+                            <span class="fw-semibold text-dark">@h.Label</span>
                         </div>
                     </div>
                 }
             </div>
         </div>
-    </div>
 
-    <!-- Right Column: Pricing & Actions -->
-    <div class="col-lg-4 animate-fade-in-right">
-        <!-- Pricing Card -->
-        <div class="vd-pricing-card">
-            <div class="vd-pricing-header">
-                <span class="vd-pricing-label">Price Per Day</span>
-                <div class="vd-pricing-amount">₹@Model.PricePerDay.ToString("N2")</div>
-                <span class="vd-pricing-sub">Inclusive of all taxes</span>
-            </div>
-
-            <div class="vd-pricing-body">
-                <div class="vd-pricing-row">
-                    <span><i class="bi bi-clock me-2"></i>Min. Rental</span>
-                    <strong>1 Day</strong>
+        <div class="col-lg-4">
+            <div class="bg-white border text-dark p-4 p-xl-5 rounded-4 shadow-sm position-relative overflow-hidden mb-4">
+                <div class="position-absolute end-0 bottom-0 mb-4 me-3 z-0" style="opacity: 0.1;">
+                    <img src="/images/logo.png" alt="RentWheels" style="width: 140px; filter: grayscale(100%);" />
                 </div>
-                <div class="vd-pricing-row">
-                    <span><i class="bi bi-geo-alt me-2"></i>Pickup</span>
-                    <strong>In-Store</strong>
-                </div>
-                <div class="vd-pricing-row">
-                    <span><i class="bi bi-fuel-pump me-2"></i>Fuel Policy</span>
-                    <strong>Full-to-Full</strong>
-                </div>
-            </div>
-
-            <div class="vd-pricing-actions">
-                @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Customer") && Model.IsAvailable)
-                {
-                    <a asp-controller="Bookings" asp-action="Create" asp-route-vehicleId="@Model.Id" class="btn btn-primary w-100 btn-lg">
-                        <i class="bi bi-calendar-plus me-1"></i>Book Now
-                    </a>
-                }
-                else if (!Model.IsAvailable)
-                {
-                    <button class="btn btn-secondary w-100 btn-lg" disabled>
-                        <i class="bi bi-x-circle me-1"></i>Currently Unavailable
-                    </button>
-                }
-                @if (User.IsInRole("Admin"))
-                {
-                    <div class="d-flex gap-2 mt-2">
-                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning flex-fill">
-                            <i class="bi bi-pencil me-1"></i>Edit
-                        </a>
-                        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger flex-fill">
-                            <i class="bi bi-trash me-1"></i>Delete
-                        </a>
-                    </div>
-                }
-                <a asp-action="Index" class="btn btn-outline-secondary w-100 mt-2">
-                    <i class="bi bi-arrow-left me-1"></i>Back to Fleet
-                </a>
-            </div>
-        </div>
-
-        <!-- Quick Info Card -->
-        <div class="vd-quick-info mt-3">
-            <div class="vd-qi-item">
-                <i class="bi bi-patch-check-fill text-success"></i>
-                <span>Verified & Inspected</span>
-            </div>
-            <div class="vd-qi-item">
-                <i class="bi bi-shield-fill-check text-primary"></i>
-                <span>Insurance Included</span>
-            </div>
-            <div class="vd-qi-item">
-                <i class="bi bi-headset text-info"></i>
-                <span>24/7 Customer Support</span>
+                <h5 class="fw-bold mb-4 position-relative z-1 text-dark">RentWheels Promise</h5>
+                
+                <ul class="list-unstyled mb-0 position-relative z-1 d-flex flex-column gap-4">
+                    @foreach (var perk in perks)
+                    {
+                        <li class="d-flex align-items-start">
+                            <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center mt-1 me-3" style="width: 32px; height: 32px; flex-shrink: 0;">
+                                <i class="bi @perk.Item1 text-primary small"></i>
+                            </div>
+                            <div>
+                                <strong class="d-block mb-1 text-dark">@perk.Item2</strong>
+                                <span class="text-muted small">@perk.Item3</span>
+                            </div>
+                        </li>
+                    }
+                </ul>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .professional-details-wrapper {
+        padding-bottom: 5rem;
+    }
+    .hover-lift {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .hover-lift:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
+    }
+    .feature-hover {
+        transition: background-color 0.2s ease, transform 0.2s ease;
+        border: 1px solid transparent;
+    }
+    .feature-hover:hover {
+        background-color: #fff !important;
+        border-color: #e9ecef;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+    .fw-black {
+        font-weight: 900 !important;
+    }
+</style>

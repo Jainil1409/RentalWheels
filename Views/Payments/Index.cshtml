@@ -47,7 +47,38 @@ else
         </div>
     </div>
 
-    <div class="vrms-table scroll-animate">
+    <div class="d-flex justify-content-center mb-4 scroll-animate">
+        <div class="btn-group bg-white rounded-pill p-1 shadow-sm border" role="group" aria-label="Payment Toggle" style="border-color: var(--gray-200) !important;">
+            <input type="radio" class="btn-check" name="paymentToggle" id="btnBooking" autocomplete="off" checked onchange="togglePaymentTables('booking')">
+            <label class="btn toggle-btn rounded-pill px-4 py-2 fw-medium border-0 m-0" for="btnBooking" style="color: #64748b; transition: all 0.3s ease;">
+                <i class="bi bi-car-front me-2"></i>Booking Payments
+            </label>
+
+            <input type="radio" class="btn-check" name="paymentToggle" id="btnDamage" autocomplete="off" onchange="togglePaymentTables('damage')">
+            <label class="btn toggle-btn rounded-pill px-4 py-2 fw-medium border-0 m-0" for="btnDamage" style="color: #64748b; transition: all 0.3s ease;">
+                <i class="bi bi-shield-exclamation me-2"></i>Damage Penalties
+            </label>
+        </div>
+    </div>
+
+    <style>
+        .btn-check:checked + label[for="btnBooking"] {
+            background: linear-gradient(135deg, #0d6efd, #0b5ed7) !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.25);
+        }
+        .btn-check:checked + label[for="btnDamage"] {
+            background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+        }
+        .toggle-btn:hover:not(.btn-check:checked + label) {
+            background-color: var(--gray-100);
+            color: var(--dark) !important;
+        }
+    </style>
+
+    <div class="vrms-table scroll-animate" id="bookingPaymentsTable">
         <div class="table-responsive">
             <table class="table table-hover">
                 <thead>
@@ -118,4 +149,66 @@ else
             </table>
         </div>
     </div>
+
+    @if (ViewBag.DamagePayments != null && ((List<vehicle_management_system_mvc.Models.DamageReport>)ViewBag.DamagePayments).Any())
+    {
+        <div class="vrms-table scroll-animate" id="damagePaymentsTable" style="display: none;">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-danger">
+                        <tr>
+                            <th>Report #</th>
+                            <th>Customer</th>
+                            <th>Vehicle</th>
+                            <th>Booking</th>
+                            <th>Amount</th>
+                            <th>Method</th>
+                            <th>Status</th>
+                            <th>Invoice</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var report in (List<vehicle_management_system_mvc.Models.DamageReport>)ViewBag.DamagePayments)
+                        {
+                            <tr>
+                                <td><strong>DMG-@report.Id</strong></td>
+                                <td>@(@report.Booking?.Customer?.FullName ?? "Unknown")</td>
+                                <td>@(@report.Booking?.Vehicle?.Brand) @(@report.Booking?.Vehicle?.Model)</td>
+                                <td>#@report.BookingId</td>
+                                <td class="text-danger"><strong>₹@report.DamageCost.ToString("N2")</strong></td>
+                                <td>
+                                    <span class="badge bg-secondary">Paid</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success">Settled</span>
+                                </td>
+                                <td>
+                                    <a asp-action="DamageInvoice" asp-route-reportId="@report.Id" class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-file-earmark-pdf"></i> View
+                                    </a>
+                                </td>
+                                <td>@report.CreatedAt.ToString("MMM dd, yyyy HH:mm")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
 }
+
+<script>
+    function togglePaymentTables(type) {
+        const bookingTable = document.getElementById('bookingPaymentsTable');
+        const damageTable = document.getElementById('damagePaymentsTable');
+        
+        if (type === 'booking') {
+            if(bookingTable) bookingTable.style.display = 'block';
+            if(damageTable) damageTable.style.display = 'none';
+        } else {
+            if(bookingTable) bookingTable.style.display = 'none';
+            if(damageTable) damageTable.style.display = 'block';
+        }
+    }
+</script>
