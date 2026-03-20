@@ -31,4 +31,9 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Clear the notification sound flag when entering the login page
+        // This ensures the sound will buzz again upon successful login if notifications exist.
+        sessionStorage.removeItem('notificationSoundPlayed');
+    </script>
 }

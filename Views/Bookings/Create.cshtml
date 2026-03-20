@@ -364,6 +364,11 @@
         font-size: 1.5rem;
         font-weight: 800;
         color: var(--gray-900, #0f172a);
+        text-align: right;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        line-height: 1.1;
     }
 
     .bv-note-box {
@@ -655,10 +660,10 @@
                     const finalTotal = totalRent + bvDepositAmount;
                     document.getElementById('bvSumDays').textContent  = diff + ' day' + (diff !== 1 ? 's' : '');
                     document.getElementById('bvSumTotal').innerHTML =
-                        '₹' + finalTotal.toLocaleString('en-IN', {
+                        '<span>₹' + finalTotal.toLocaleString('en-IN', {
                             minimumFractionDigits: 2,
                             maximumFractionDigits: 2
-                        }) + '<br><small class="text-success" style="font-size: 0.6em; font-weight:normal;">Includes Refundable Deposit: ₹' + bvDepositAmount.toLocaleString() + '</small>';
+                        }) + '</span><span class="text-success" style="font-size: 0.45em; font-weight:600; margin-top: 4px; display: block;">Includes Refundable Deposit: ₹' + bvDepositAmount.toLocaleString() + '</span>';
                 } else {
                     document.getElementById('bvSumDays').textContent  = '— days';
                     document.getElementById('bvSumTotal').textContent = '₹—';

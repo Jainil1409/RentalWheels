@@ -12,6 +12,8 @@
     } catch { }
 }
 
+<div id="admin-notification-data" data-count="@pendingCount" style="display:none;"></div>
+
 @* Admin Sidebar - Modern Professional Design *@
 
 <aside class="admin-sidebar" id="adminSidebar">
@@ -126,3 +128,22 @@
 
 <!-- Sidebar Overlay for Mobile -->
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Script to preserve admin sidebar scroll position across reloads -->
+<script>
+    (function () {
+        const sidebarNav = document.querySelector('.sidebar-nav');
+        if (sidebarNav) {
+            // Restore scroll position instantly
+            const savedScroll = sessionStorage.getItem('adminSidebarScrollPos');
+            if (savedScroll) {
+                sidebarNav.scrollTop = parseInt(savedScroll, 10);
+            }
+
+            // Save scroll position just before page unloads
+            window.addEventListener('beforeunload', function () {
+                sessionStorage.setItem('adminSidebarScrollPos', sidebarNav.scrollTop);
+            });
+        }
+    })();
+</script>

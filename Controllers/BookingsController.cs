@@ -214,6 +214,13 @@ namespace vehicle_management_system_mvc.Controllers
             if (booking == null) return NotFound();
 
             ViewBag.DepositAmount = booking.DepositAmount;
+            var newReport = new DamageReport { BookingId = id, DamageCost = 0 };
+            return View(newReport);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GenerateDamageReport(DamageReport model, bool skip = false)
         {
             var booking = await _context.Bookings.Include(b => b.Vehicle).FirstOrDefaultAsync(b => b.Id == model.BookingId);

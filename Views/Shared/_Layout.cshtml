@@ -212,6 +212,8 @@
                 
                 int totalUserNotifications = pendingPaymentCount + kycNotificationCount + damageReportCount;
 
+                <div id="user-notification-data" data-count="@totalUserNotifications" style="display:none;"></div>
+
                 @if (User.IsInRole("Customer"))
                 {
                     <li class="nav-item">
@@ -388,6 +390,48 @@
       <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 
       <script src="~/js/site.js" asp-append-version="true"></script>
+      
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let totalNotifications = 0;
+            const userData = document.getElementById('user-notification-data');
+            const adminData = document.getElementById('admin-notification-data');
+            
+            if (userData) {
+                totalNotifications += parseInt(userData.getAttribute('data-count')) || 0;
+            }
+            if (adminData) {
+                totalNotifications += parseInt(adminData.getAttribute('data-count')) || 0;
+            }
+
+            if (totalNotifications > 0) {
+                const hasPlayed = sessionStorage.getItem('notificationSoundPlayed');
+                if (!hasPlayed) {
+                    try {
+                        const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2870/2870-preview.mp3'); // A pleasant, modern double-chime notification
+                        audio.volume = 0.8;
+                        const playPromise = audio.play();
+                        
+                        if (playPromise !== undefined) {
+                            playPromise.then(_ => {
+                                sessionStorage.setItem('notificationSoundPlayed', 'true');
+                            }).catch(error => {
+                                // Autoplay blocked by browser. Wait for first interaction.
+                                document.body.addEventListener('click', function playOnInteract() {
+                                    audio.play().then(() => {
+                                        sessionStorage.setItem('notificationSoundPlayed', 'true');
+                                    });
+                                    document.body.removeEventListener('click', playOnInteract);
+                                }, { once: true });
+                            });
+                        }
+                    } catch (e) {
+                        console.error('Error playing notification sound', e);
+                    }
+                }
+            }
+        });
+      </script>
 
       @await RenderSectionAsync("Scripts", required: false)
 

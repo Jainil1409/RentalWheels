@@ -36,8 +36,20 @@ namespace vehicle_management_system_mvc.Migrations
                     b.Property<int>("CustomerId")
                         .HasColumnType("integer");
 
+                    b.Property<decimal>("DepositAmount")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("DepositDeducted")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("DepositRefunded")
+                        .HasColumnType("numeric");
+
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDepositRefunded")
+                        .HasColumnType("boolean");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("timestamp with time zone");
@@ -57,7 +69,7 @@ namespace vehicle_management_system_mvc.Migrations
 
                     b.HasIndex("VehicleId");
 
-                    b.ToTable("Bookings");
+                    b.ToTable("Bookings", (string)null);
                 });
 
             modelBuilder.Entity("vehicle_management_system_mvc.Models.DamageReport", b =>
@@ -93,7 +105,7 @@ namespace vehicle_management_system_mvc.Migrations
                     b.HasIndex("BookingId")
                         .IsUnique();
 
-                    b.ToTable("DamageReports");
+                    b.ToTable("DamageReports", (string)null);
                 });
 
             modelBuilder.Entity("vehicle_management_system_mvc.Models.Payment", b =>
@@ -132,7 +144,7 @@ namespace vehicle_management_system_mvc.Migrations
                     b.HasIndex("BookingId")
                         .IsUnique();
 
-                    b.ToTable("Payments");
+                    b.ToTable("Payments", (string)null);
                 });
 
             modelBuilder.Entity("vehicle_management_system_mvc.Models.User", b =>
@@ -190,7 +202,7 @@ namespace vehicle_management_system_mvc.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("vehicle_management_system_mvc.Models.Vehicle", b =>
@@ -208,6 +220,9 @@ namespace vehicle_management_system_mvc.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("DepositAmount")
+                        .HasColumnType("numeric");
 
                     b.Property<string>("Description")
                         .HasMaxLength(500)
@@ -240,7 +255,7 @@ namespace vehicle_management_system_mvc.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Vehicles");
+                    b.ToTable("Vehicles", (string)null);
                 });
 
             modelBuilder.Entity("vehicle_management_system_mvc.Models.Booking", b =>
