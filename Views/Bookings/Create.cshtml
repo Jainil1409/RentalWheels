@@ -633,6 +633,7 @@
 
     <script>
         const bvPricePerDay = @(Model.Vehicle?.PricePerDay.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "0");
+        const bvDepositAmount = @(Model.Vehicle?.DepositAmount.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "0");
 
         function bvFormatDate(val) {
             if (!val) return '—';
@@ -650,12 +651,14 @@
             if (start && end) {
                 const diff = Math.round((new Date(end) - new Date(start)) / 86400000);
                 if (diff > 0) {
+                    const totalRent = diff * bvPricePerDay;
+                    const finalTotal = totalRent + bvDepositAmount;
                     document.getElementById('bvSumDays').textContent  = diff + ' day' + (diff !== 1 ? 's' : '');
-                    document.getElementById('bvSumTotal').textContent =
-                        '₹' + (diff * bvPricePerDay).toLocaleString('en-IN', {
+                    document.getElementById('bvSumTotal').innerHTML =
+                        '₹' + finalTotal.toLocaleString('en-IN', {
                             minimumFractionDigits: 2,
                             maximumFractionDigits: 2
-                        });
+                        }) + '<br><small class="text-success" style="font-size: 0.6em; font-weight:normal;">Includes Refundable Deposit: ₹' + bvDepositAmount.toLocaleString() + '</small>';
                 } else {
                     document.getElementById('bvSumDays').textContent  = '— days';
                     document.getElementById('bvSumTotal').textContent = '₹—';

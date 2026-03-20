@@ -85,8 +85,20 @@
                                 </td>
                                 <td class="text-center align-middle">@days</td>
                                 <td class="text-end align-middle">₹@Model.Booking.Vehicle.PricePerDay.ToString("N2")</td>
-                                <td class="text-end align-middle"><strong>₹@Model.Amount.ToString("N2")</strong></td>
+                                <td class="text-end align-middle"><strong>₹@Model.Booking.TotalCost.ToString("N2")</strong></td>
                             </tr>
+                            @if(Model.Booking.DepositAmount > 0)
+                            {
+                            <tr>
+                                <td class="align-middle">
+                                    <div class="fw-bold">Security Deposit</div>
+                                    <small class="text-success"><i class="bi bi-arrow-return-left"></i> Fully refundable upon safe return</small>
+                                </td>
+                                <td class="text-center align-middle">1</td>
+                                <td class="text-end align-middle">₹@Model.Booking.DepositAmount.ToString("N2")</td>
+                                <td class="text-end align-middle"><strong>₹@Model.Booking.DepositAmount.ToString("N2")</strong></td>
+                            </tr>
+                            }
                         </tbody>
                     </table>
                 </div>

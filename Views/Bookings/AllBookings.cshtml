@@ -64,7 +64,13 @@ else
                             <td>@booking.StartDate.ToString("MMM dd, yyyy")</td>
                             <td>@booking.EndDate.ToString("MMM dd, yyyy")</td>
                             <td>@((booking.EndDate - booking.StartDate).Days)</td>
-                            <td><strong>₹@booking.TotalCost.ToString("N2")</strong></td>
+                            <td>
+                                <strong>₹@booking.TotalCost.ToString("N2")</strong>
+                                @if (booking.DepositAmount > 0)
+                                {
+                                    <br/><small class="text-muted">+ ₹@booking.DepositAmount.ToString("N2") deposit</small>
+                                }
+                            </td>
                             <td>
                                 @switch (booking.Status)
                                 {
@@ -78,6 +84,14 @@ else
                                         <span class="badge bg-danger">Rejected</span>
                                         break;
                                     case BookingStatus.Completed:
+                                        <span class="badge bg-info">Completed</span>
+                                        @if (booking.IsDepositRefunded)
+                                        {
+                                            <div class="mt-1">
+                                                <small class="text-success fw-bold" style="font-size: 0.75rem;"><i class="bi bi-shield-check"></i> Deposit Actioned</small>
+                                            </div>
+                                        }
+                                        break;
                                         <span class="badge bg-info">Completed</span>
                                         break;
                                     case BookingStatus.Cancelled:

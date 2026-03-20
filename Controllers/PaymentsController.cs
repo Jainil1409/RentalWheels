@@ -118,10 +118,11 @@ namespace vehicle_management_system_mvc.Controllers
 
             if (model.Method == PaymentMethod.Cash)
             {
+                var paymentAmount = booking.TotalCost + booking.DepositAmount;
                 var payment = new Payment
                 {
                     BookingId = model.BookingId,
-                    Amount = booking.TotalCost,
+                    Amount = paymentAmount,
                     PaymentDate = DateTime.UtcNow,
                     Method = PaymentMethod.Cash,
                     Status = PaymentStatus.Completed,
@@ -134,12 +135,13 @@ namespace vehicle_management_system_mvc.Controllers
                 // Send invoice email
                 await SendInvoiceEmailAsync(booking, payment);
 
-                TempData["Success"] = $"Cash payment of ₹{booking.TotalCost:N2} completed successfully.";
+                TempData["Success"] = $"Cash payment of ₹{paymentAmount:N2} completed successfully.";
                 return RedirectToAction("Invoice", new { paymentId = payment.Id });
             }
 
             // Stripe Checkout Session
             var domain = $"{Request.Scheme}://{Request.Host}";
+            var totalWithDeposit = booking.TotalCost + booking.DepositAmount;
             var options = new SessionCreateOptions
             {
                 PaymentMethodTypes = new List<string> { "card" },
@@ -149,12 +151,12 @@ namespace vehicle_management_system_mvc.Controllers
                     {
                         PriceData = new SessionLineItemPriceDataOptions
                         {
-                            UnitAmountDecimal = booking.TotalCost * 100, // Stripe uses cents
+                            UnitAmountDecimal = totalWithDeposit * 100, // Stripe uses cents
                             Currency = "inr",
                             ProductData = new SessionLineItemPriceDataProductDataOptions
                             {
                                 Name = $"{booking.Vehicle.Brand} {booking.Vehicle.Model} Rental",
-                                Description = $"Booking #{booking.Id} — {booking.StartDate:MMM dd} to {booking.EndDate:MMM dd, yyyy}"
+                                Description = $"Booking #{booking.Id} — Rental + Deposit"
                             }
                         },
                         Quantity = 1
@@ -206,10 +208,11 @@ namespace vehicle_management_system_mvc.Controllers
                 return RedirectToAction("Create", new { bookingId });
             }
 
+            var totalWithDeposit = booking.TotalCost + booking.DepositAmount;
             var payment = new Payment
             {
                 BookingId = bookingId,
-                Amount = booking.TotalCost,
+                Amount = totalWithDeposit,
                 PaymentDate = DateTime.UtcNow,
                 Method = PaymentMethod.Stripe,
                 Status = PaymentStatus.Completed,
@@ -223,7 +226,7 @@ namespace vehicle_management_system_mvc.Controllers
             // Send invoice email
             await SendInvoiceEmailAsync(booking, payment);
 
-            TempData["Success"] = $"Stripe payment of ₹{booking.TotalCost:N2} completed successfully.";
+            TempData["Success"] = $"Stripe payment of ₹{totalWithDeposit:N2} completed successfully.";
             return RedirectToAction("Invoice", new { paymentId = payment.Id });
         }
 

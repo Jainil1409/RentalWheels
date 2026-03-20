@@ -34,6 +34,18 @@ namespace vehicle_management_system_mvc.Models
         [Display(Name = "Total Cost")]
         public decimal TotalCost { get; set; }
 
+        [Display(Name = "Security Deposit")]
+        public decimal DepositAmount { get; set; }
+
+        [Display(Name = "Deposit Deducted")]
+        public decimal DepositDeducted { get; set; }
+
+        [Display(Name = "Deposit Refunded")]
+        public decimal DepositRefunded { get; set; }
+
+        [Display(Name = "Is Deposit Refunded")]
+        public bool IsDepositRefunded { get; set; }
+
         public BookingStatus Status { get; set; } = BookingStatus.Pending;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

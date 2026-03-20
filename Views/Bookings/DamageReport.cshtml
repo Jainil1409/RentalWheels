@@ -14,6 +14,12 @@
                 <div class="card-body p-4">
                     <div class="alert alert-info">
                         <strong>Booking #@Model.BookingId</strong> - Please specify any damages found upon vehicle return. If there are no damages, leave the cost at 0.
+                        <hr/>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span><strong>Held Security Deposit:</strong></span>
+                            <span class="fs-5 text-success fw-bold">₹@ViewBag.DepositAmount</span>
+                        </div>
+                        <small class="d-block mt-2"><i class="bi bi-info-circle"></i> The recorded damage cost will be directly deducted from the security deposit held. Remaining funds will be marked as refunded to the user.</small>
                     </div>
 
                     <form asp-action="GenerateDamageReport" asp-controller="Bookings" method="post">

@@ -30,6 +30,10 @@ namespace vehicle_management_system_mvc.Models
         [Display(Name = "Price Per Day")]
         public decimal PricePerDay { get; set; }
 
+        [Required, Range(0, 50000)]
+        [Display(Name = "Security Deposit")]
+        public decimal DepositAmount { get; set; }
+
         [Display(Name = "Available")]
         public bool IsAvailable { get; set; } = true;
 

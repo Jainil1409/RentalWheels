@@ -97,6 +97,7 @@ namespace vehicle_management_system_mvc.Controllers
 
             var days = (model.EndDate - model.StartDate).Days;
             var totalCost = days * vehicle.PricePerDay;
+            var depositAmount = vehicle.DepositAmount;
 
             var booking = new Booking
             {
@@ -105,6 +106,7 @@ namespace vehicle_management_system_mvc.Controllers
                 StartDate = DateTime.SpecifyKind(model.StartDate, DateTimeKind.Utc),
                 EndDate = DateTime.SpecifyKind(model.EndDate, DateTimeKind.Utc),
                 TotalCost = totalCost,
+                DepositAmount = depositAmount,
                 Status = BookingStatus.Pending,
                 CreatedAt = DateTime.UtcNow
             };
@@ -112,7 +114,7 @@ namespace vehicle_management_system_mvc.Controllers
             _context.Bookings.Add(booking);
             await _context.SaveChangesAsync();
 
-            TempData["Success"] = $"Booking created! Total cost: ₹{totalCost:N2} for {days} day(s).";
+            TempData["Success"] = $"Booking created! Rent: ₹{totalCost:N2} & Deposit: ₹{depositAmount:N2} for {days} day(s).";
             return RedirectToAction(nameof(MyBookings));
         }
 
@@ -194,8 +196,12 @@ namespace vehicle_management_system_mvc.Controllers
             booking.Status = BookingStatus.Completed;
             booking.Vehicle.IsAvailable = true;
             
+            booking.DepositDeducted = 0;
+            booking.DepositRefunded = booking.DepositAmount;
+            booking.IsDepositRefunded = true;
+
             await _context.SaveChangesAsync();
-            TempData["Success"] = "Rental completed cleanly with no damage. Vehicle is now available.";
+            TempData["Success"] = "Rental completed cleanly with no damage. Deposit fully refunded. Vehicle is now available.";
 
             return RedirectToAction(nameof(AllBookings));
         }
@@ -207,13 +213,7 @@ namespace vehicle_management_system_mvc.Controllers
             var booking = await _context.Bookings.FindAsync(id);
             if (booking == null) return NotFound();
 
-            var newReport = new DamageReport { BookingId = id, DamageCost = 0 };
-            return View(newReport);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+            ViewBag.DepositAmount = booking.DepositAmount;
         public async Task<IActionResult> GenerateDamageReport(DamageReport model, bool skip = false)
         {
             var booking = await _context.Bookings.Include(b => b.Vehicle).FirstOrDefaultAsync(b => b.Id == model.BookingId);
@@ -223,6 +223,22 @@ namespace vehicle_management_system_mvc.Controllers
             booking.Status = BookingStatus.Completed;
             booking.Vehicle.IsAvailable = true;
 
+            decimal damageCost = skip ? 0 : model.DamageCost;
+            
+            // Deduct from deposit
+            if (damageCost <= booking.DepositAmount)
+            {
+                booking.DepositDeducted = damageCost;
+                booking.DepositRefunded = booking.DepositAmount - damageCost;
+                booking.IsDepositRefunded = true; // Refunded remainder
+            }
+            else
+            {
+                booking.DepositDeducted = booking.DepositAmount;
+                booking.DepositRefunded = 0;
+                booking.IsDepositRefunded = true; // Fully consumed
+            }
+
             if (!skip && model.DamageCost > 0)
             {
                 var report = new DamageReport
@@ -230,7 +246,7 @@ namespace vehicle_management_system_mvc.Controllers
                     BookingId = model.BookingId,
                     Description = model.Description ?? "No specific details provided",
                     DamageCost = model.DamageCost,
-                    IsPaid = false,
+                    IsPaid = damageCost <= booking.DepositAmount, // Paid via deposit if covered
                     CreatedAt = DateTime.UtcNow,
                     PdfUrl = "" // Updated after save
                 };
