@@ -78,6 +78,11 @@
 
 <body class="@(User.Identity?.IsAuthenticated == true && User.IsInRole("Admin") ? "admin-layout" : "")">
 
+  <div id="global-loader">
+    <div class="loader-spinner"></div>
+    <div class="loader-text">Loading...</div>
+  </div>
+
   <header>
     <nav class="navbar navbar-expand-lg vrms-navbar fixed-top">
       <div class="container">

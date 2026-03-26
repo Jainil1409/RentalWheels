@@ -168,4 +168,64 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
     }
+
+    // === Global Loading Indicator Logic ===
+    function showGlobalLoader() {
+        const loader = document.getElementById('global-loader');
+        if (loader) {
+            loader.classList.add('show');
+        }
+    }
+
+    function hideGlobalLoader() {
+        const loader = document.getElementById('global-loader');
+        if (loader) {
+            loader.classList.remove('show');
+        }
+    }
+
+    // Hide loader when navigating back via browser history (bfcache)
+    window.addEventListener('pageshow', function (e) {
+        if (e.persisted) {
+            hideGlobalLoader();
+        }
+        // Always try to hide it on fully load just in case
+        hideGlobalLoader();
+    });
+
+    // Intercept normal form submissions
+    document.addEventListener('submit', function (e) {
+        // Exclude forms that should not trigger the loader or open in a new tab
+        if (!e.target.hasAttribute('data-no-loader') && e.target.getAttribute('target') !== '_blank') {
+            // Check unobtrusive validation if present
+            if (typeof $(e.target).valid === 'function') {
+                if ($(e.target).valid()) {
+                    showGlobalLoader();
+                }
+            } else {
+                showGlobalLoader();
+            }
+        }
+    });
+
+    // Intercept link clicks (except specific cases)
+    document.addEventListener('click', function (e) {
+        const link = e.target.closest('a');
+        if (link && link.href) {
+            const isTargetBlank = link.getAttribute('target') === '_blank';
+            const isDownload = link.hasAttribute('download');
+            const isHash = link.href.indexOf('#') !== -1 && link.href.split('#')[0] === window.location.href.split('#')[0];
+            const isJs = link.href.startsWith('javascript:');
+            const hasNoLoader = link.hasAttribute('data-no-loader');
+            const isToggle = link.hasAttribute('data-bs-toggle') || link.hasAttribute('data-toggle');
+
+            // Exclude empty hrefs or #
+            const isNullOrEmpty = link.getAttribute('href') === '' || link.getAttribute('href') === '#';
+
+            if (!isTargetBlank && !isDownload && !isHash && !isJs && !hasNoLoader && !isToggle && !isNullOrEmpty) {
+                // If it looks like a normal navigation, show the loader
+                showGlobalLoader();
+            }
+        }
+    });
 });
