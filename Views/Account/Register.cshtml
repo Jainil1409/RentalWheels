@@ -1,6 +1,7 @@
 @model RegisterViewModel
 @{
     ViewData["Title"] = "Register";
+    ViewData["IsAuthPage"] = "true";
 }
 
 <div class="auth-page">
@@ -9,40 +10,54 @@
         <h3>Create Account</h3>
         <p class="auth-subtitle">Join RentWheels and start renting vehicles today</p>
         <form asp-action="Register" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-            <div class="mb-3">
-                <label asp-for="FullName" class="form-label"><i class="bi bi-person me-1"></i>Full Name</label>
-                <input asp-for="FullName" class="form-control" placeholder="Jainil Vyas" />
-                <span asp-validation-for="FullName" class="text-danger"></span>
-            </div>
-            <div class="mb-3">
-                <label asp-for="Email" class="form-label"><i class="bi bi-envelope me-1"></i>Email</label>
-                <input asp-for="Email" class="form-control" placeholder="you@gmail.com" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
-            <div class="mb-3">
-                <label asp-for="Phone" class="form-label"><i class="bi bi-telephone me-1"></i>Phone</label>
-                <input asp-for="Phone" class="form-control" placeholder="9876543210" />
-                <span asp-validation-for="Phone" class="text-danger"></span>
-            </div>
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+            
             <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label asp-for="Password" class="form-label"><i class="bi bi-lock me-1"></i>Password</label>
-                    <input asp-for="Password" class="form-control" />
-                    <span asp-validation-for="Password" class="text-danger"></span>
+                <div class="col-6 mb-2">
+                    <label asp-for="FullName" class="form-label mb-1"><i class="bi bi-person me-1"></i>Full Name</label>
+                    <input asp-for="FullName" class="form-control form-control-sm" placeholder="Jainil Vyas" />
+                    <span asp-validation-for="FullName" class="text-danger small"></span>
                 </div>
-                <div class="col-md-6 mb-3">
-                    <label asp-for="ConfirmPassword" class="form-label"><i class="bi bi-lock-fill me-1"></i>Confirm</label>
-                    <input asp-for="ConfirmPassword" class="form-control" />
-                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                <div class="col-6 mb-2">
+                    <label asp-for="Phone" class="form-label mb-1"><i class="bi bi-telephone me-1"></i>Phone</label>
+                    <input asp-for="Phone" class="form-control form-control-sm" placeholder="9876543210" />
+                    <span asp-validation-for="Phone" class="text-danger small"></span>
                 </div>
             </div>
-            <button type="submit" class="btn btn-primary w-100 btn-lg">
+
+            <div class="mb-2">
+                <label asp-for="Email" class="form-label mb-1"><i class="bi bi-envelope me-1"></i>Email</label>
+                <input asp-for="Email" class="form-control form-control-sm" placeholder="you@gmail.com" />
+                <span asp-validation-for="Email" class="text-danger small"></span>
+            </div>
+
+            <div class="row">
+                <div class="col-6 mb-2">
+                    <label asp-for="Password" class="form-label mb-1"><i class="bi bi-lock me-1"></i>Password</label>
+                    <input asp-for="Password" type="password" class="form-control form-control-sm" />
+                    <span asp-validation-for="Password" class="text-danger small"></span>
+                </div>
+                <div class="col-6 mb-2">
+                    <label asp-for="ConfirmPassword" class="form-label mb-1"><i class="bi bi-lock-fill me-1"></i>Confirm</label>
+                    <input asp-for="ConfirmPassword" type="password" class="form-control form-control-sm" />
+                    <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 py-2">
                 <i class="bi bi-person-plus me-2"></i>Create Account
             </button>
         </form>
         <div class="auth-divider">or</div>
-        <p class="text-center mb-0">Already have an account? <a asp-action="Login" class="fw-semibold">Sign in</a></p>
+
+        <form asp-action="ExternalLogin" method="post" class="mb-2">
+            <button type="submit" name="provider" value="Google" class="btn btn-outline-dark w-100 fw-semibold d-flex align-items-center justify-content-center py-2" title="Sign up using your Google account">
+                <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google Logo" style="width: 20px; height: 20px;" class="me-2" />
+                Continue with Google
+            </button>
+        </form>
+
+        <p class="text-center mb-0 small">Already have an account? <a asp-action="Login" class="fw-semibold">Sign in</a></p>
     </div>
 </div>
 

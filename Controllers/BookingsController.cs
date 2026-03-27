@@ -2,8 +2,10 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Stripe;
 using vehicle_management_system_mvc.Data;
 using vehicle_management_system_mvc.Models;
+using vehicle_management_system_mvc.Services;
 using vehicle_management_system_mvc.ViewModels;
 
 using QuestPDF.Fluent;
@@ -16,10 +18,12 @@ namespace vehicle_management_system_mvc.Controllers
     public class BookingsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly EmailService _emailService;
 
-        public BookingsController(ApplicationDbContext context)
+        public BookingsController(ApplicationDbContext context, EmailService emailService)
         {
             _context = context;
+            _emailService = emailService;
         }
 
         private int GetUserId() => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
@@ -125,6 +129,7 @@ namespace vehicle_management_system_mvc.Controllers
             var bookings = await _context.Bookings
                 .Include(b => b.Vehicle)
                 .Include(b => b.Payment)
+                .Include(b => b.DamageReport)
                 .Where(b => b.CustomerId == userId)
                 .OrderByDescending(b => b.CreatedAt)
                 .ToListAsync();
@@ -190,7 +195,11 @@ namespace vehicle_management_system_mvc.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CompleteWithoutDamage(int id)
         {
-            var booking = await _context.Bookings.Include(b => b.Vehicle).FirstOrDefaultAsync(b => b.Id == id);
+            var booking = await _context.Bookings
+                .Include(b => b.Vehicle)
+                .Include(b => b.Payment)
+                .Include(b => b.Customer)
+                .FirstOrDefaultAsync(b => b.Id == id);
             if (booking == null) return NotFound();
 
             booking.Status = BookingStatus.Completed;
@@ -200,7 +209,29 @@ namespace vehicle_management_system_mvc.Controllers
             booking.DepositRefunded = booking.DepositAmount;
             booking.IsDepositRefunded = true;
 
+            // Refund deposit via Stripe if payment was made via Stripe
+            string? stripeRefundId = null;
+            if (booking.Payment?.Method == vehicle_management_system_mvc.Models.PaymentMethod.Stripe && !string.IsNullOrEmpty(booking.Payment.StripePaymentIntentId) && booking.DepositAmount > 0)
+            {
+                stripeRefundId = await RefundDepositViaStripeAsync(booking.Payment.StripePaymentIntentId, booking.DepositAmount);
+                booking.StripeDepositRefundId = stripeRefundId;
+            }
+
+            // User-facing notification for deposit refund
+            var userNotification = new Notification
+            {
+                Message = $"Your security deposit of ₹{booking.DepositAmount:N2} for Booking #{booking.Id} has been refunded to your original payment method.",
+                Type = "DepositRefund",
+                BookingId = booking.Id,
+                UserId = booking.CustomerId
+            };
+            _context.Notifications.Add(userNotification);
+
             await _context.SaveChangesAsync();
+
+            // Send refund email to user
+            await SendDepositRefundEmailSafeAsync(booking, 0, booking.DepositAmount, stripeRefundId);
+
             TempData["Success"] = "Rental completed cleanly with no damage. Deposit fully refunded. Vehicle is now available.";
 
             return RedirectToAction(nameof(AllBookings));
@@ -223,7 +254,11 @@ namespace vehicle_management_system_mvc.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GenerateDamageReport(DamageReport model, bool skip = false)
         {
-            var booking = await _context.Bookings.Include(b => b.Vehicle).FirstOrDefaultAsync(b => b.Id == model.BookingId);
+            var booking = await _context.Bookings
+                .Include(b => b.Vehicle)
+                .Include(b => b.Payment)
+                .Include(b => b.Customer)
+                .FirstOrDefaultAsync(b => b.Id == model.BookingId);
             if (booking == null) return NotFound();
 
             // Mark booking as completed and vehicle available
@@ -246,6 +281,8 @@ namespace vehicle_management_system_mvc.Controllers
                 booking.IsDepositRefunded = true; // Fully consumed
             }
 
+            string? stripeRefundId = null;
+
             if (!skip && model.DamageCost > 0)
             {
                 var report = new DamageReport
@@ -259,16 +296,62 @@ namespace vehicle_management_system_mvc.Controllers
                 };
 
                 _context.DamageReports.Add(report);
+
+                // Refund remaining deposit via Stripe if applicable
+                if (booking.DepositRefunded > 0 && booking.Payment?.Method == vehicle_management_system_mvc.Models.PaymentMethod.Stripe && !string.IsNullOrEmpty(booking.Payment.StripePaymentIntentId))
+                {
+                    stripeRefundId = await RefundDepositViaStripeAsync(booking.Payment.StripePaymentIntentId, booking.DepositRefunded);
+                    booking.StripeDepositRefundId = stripeRefundId;
+                }
+
+                // User-facing notification for deposit refund (even if 0, to inform about damage deduction)
+                if (booking.DepositRefunded > 0)
+                {
+                    var userNotification = new Notification
+                    {
+                        Message = $"Your security deposit of ₹{booking.DepositAmount:N2} for Booking #{booking.Id} had ₹{damageCost:N2} deducted for damages. ₹{booking.DepositRefunded:N2} has been refunded.",
+                        Type = "DepositRefund",
+                        BookingId = booking.Id,
+                        UserId = booking.CustomerId
+                    };
+                    _context.Notifications.Add(userNotification);
+                }
+
                 await _context.SaveChangesAsync();
                 
                 report.PdfUrl = $"/Bookings/DownloadDamagePdf/{report.Id}";
                 await _context.SaveChangesAsync();
 
+                // Send refund email if deposit was partially/fully refunded
+                if (booking.DepositRefunded > 0)
+                {
+                    await SendDepositRefundEmailSafeAsync(booking, damageCost, booking.DepositRefunded, stripeRefundId, report.PdfUrl);
+                }
+
                 TempData["Success"] = $"Damage report generated!. Cost: ₹{model.DamageCost:N2}. Vehicle is now available.";
             }
             else
             {
+                // No damage — full deposit refund
+                if (booking.DepositRefunded > 0 && booking.Payment?.Method == vehicle_management_system_mvc.Models.PaymentMethod.Stripe && !string.IsNullOrEmpty(booking.Payment.StripePaymentIntentId))
+                {
+                    stripeRefundId = await RefundDepositViaStripeAsync(booking.Payment.StripePaymentIntentId, booking.DepositRefunded);
+                    booking.StripeDepositRefundId = stripeRefundId;
+                }
+
+                var userNotification = new Notification
+                {
+                    Message = $"Your security deposit of ₹{booking.DepositAmount:N2} for Booking #{booking.Id} has been fully refunded to your original payment method.",
+                    Type = "DepositRefund",
+                    BookingId = booking.Id,
+                    UserId = booking.CustomerId
+                };
+                _context.Notifications.Add(userNotification);
+
                 await _context.SaveChangesAsync();
+
+                await SendDepositRefundEmailSafeAsync(booking, 0, booking.DepositRefunded, stripeRefundId);
+
                 TempData["Success"] = "Rental completed cleanly with no extra damage charges. Vehicle is now available.";
             }
 
@@ -363,6 +446,58 @@ namespace vehicle_management_system_mvc.Controllers
 
             TempData["Success"] = "Booking cancelled.";
             return RedirectToAction(nameof(MyBookings));
+        }
+
+        // --- Helper Methods ---
+
+        private async Task<string?> RefundDepositViaStripeAsync(string paymentIntentId, decimal refundAmount)
+        {
+            try
+            {
+                var refundService = new RefundService();
+                var refundOptions = new RefundCreateOptions
+                {
+                    PaymentIntent = paymentIntentId,
+                    Amount = (long)(refundAmount * 100), // Stripe uses cents/paise
+                    Reason = "requested_by_customer"
+                };
+                var refund = await refundService.CreateAsync(refundOptions);
+                return refund.Id;
+            }
+            catch (Exception)
+            {
+                // Stripe refund failure should not block the completion flow
+                return null;
+            }
+        }
+
+        private async Task SendDepositRefundEmailSafeAsync(Booking booking, decimal damageCost, decimal refundAmount, string? stripeRefundId, string? pdfUrl = null)
+        {
+            try
+            {
+                if (booking.Customer == null || booking.Vehicle == null) return;
+                
+                string? absolutePdfUrl = null;
+                if (!string.IsNullOrEmpty(pdfUrl))
+                {
+                    absolutePdfUrl = $"{Request.Scheme}://{Request.Host}{pdfUrl}";
+                }
+
+                await _emailService.SendDepositRefundEmailAsync(
+                    toEmail: booking.Customer.Email,
+                    customerName: booking.Customer.FullName,
+                    vehicleName: $"{booking.Vehicle.Brand} {booking.Vehicle.Model}",
+                    bookingId: booking.Id,
+                    depositAmount: booking.DepositAmount,
+                    damageCost: damageCost,
+                    refundAmount: refundAmount,
+                    stripeRefundId: stripeRefundId,
+                    damagePdfLink: absolutePdfUrl);
+            }
+            catch
+            {
+                // Email failure should not block the flow
+            }
         }
     }
 }

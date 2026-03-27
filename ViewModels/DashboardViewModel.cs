@@ -9,5 +9,7 @@ namespace vehicle_management_system_mvc.ViewModels
         public int PendingBookings { get; set; }
         public int OverdueRentals { get; set; }
         public decimal TotalRevenue { get; set; }
+        
+        public List<Models.Notification> Notifications { get; set; } = new List<Models.Notification>();
     }
 }

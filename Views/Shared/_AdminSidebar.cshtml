@@ -8,7 +8,8 @@
     try {
         var pendingBookingsCount = await _context.Bookings.CountAsync(b => b.Status == BookingStatus.Pending);
         var pendingVerificationsCount = await _context.Users.CountAsync(u => u.Role == UserRole.Customer && !u.IsVerified && !string.IsNullOrEmpty(u.DriverLicenseNumber));
-        pendingCount = pendingBookingsCount + pendingVerificationsCount;
+        var unreadNotificationsCount = await _context.Notifications.CountAsync(n => !n.IsRead && n.UserId == null);
+        pendingCount = pendingBookingsCount + pendingVerificationsCount + unreadNotificationsCount;
     } catch { }
 }
 

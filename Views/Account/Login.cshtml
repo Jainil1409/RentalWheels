@@ -1,6 +1,7 @@
 @model LoginViewModel
 @{
     ViewData["Title"] = "Login";
+    ViewData["IsAuthPage"] = "true";
 }
 
 <div class="auth-page">
@@ -10,21 +11,29 @@
         <p class="auth-subtitle">Sign in to your RentWheels account</p>
         <form asp-action="Login" method="post">
             <div asp-validation-summary="All" class="text-danger mb-3"></div>
-            <div class="mb-3">
+            <div class="mb-2">
                 <label asp-for="Email" class="form-label"><i class="bi bi-envelope me-1"></i>Email</label>
                 <input asp-for="Email" class="form-control" placeholder="you@gmail.com" />
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>
-            <div class="mb-3">
+            <div class="mb-2">
                 <label asp-for="Password" class="form-label"><i class="bi bi-lock me-1"></i>Password</label>
                 <input asp-for="Password" class="form-control" />
                 <span asp-validation-for="Password" class="text-danger"></span>
             </div>
-            <button type="submit" class="btn btn-primary w-100 btn-lg">
+            <button type="submit" class="btn btn-primary w-100 py-2">
                 <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
             </button>
         </form>
         <div class="auth-divider">or</div>
+        
+        <form asp-action="ExternalLogin" method="post" class="mb-3">
+            <button type="submit" name="provider" value="Google" class="btn btn-outline-dark w-100 fw-semibold d-flex align-items-center justify-content-center py-2" title="Log in using your Google account">
+                <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google Logo" style="width: 20px; height: 20px;" class="me-2" />
+                Continue with Google
+            </button>
+        </form>
+
         <p class="text-center mb-0">Don't have an account? <a asp-action="Register" class="fw-semibold">Create one</a></p>
     </div>
 </div>

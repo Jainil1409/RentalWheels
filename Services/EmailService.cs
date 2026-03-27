@@ -179,5 +179,116 @@ namespace vehicle_management_system_mvc.Services
 </body>
 </html>";
         }
+
+        public async Task SendDepositRefundEmailAsync(
+            string toEmail,
+            string customerName,
+            string vehicleName,
+            int bookingId,
+            decimal depositAmount,
+            decimal damageCost,
+            decimal refundAmount,
+            string? stripeRefundId = null,
+            string? damagePdfLink = null)
+        {
+            var smtpHost = _configuration["Email:SmtpHost"]!;
+            var smtpPort = int.Parse(_configuration["Email:SmtpPort"]!);
+            var senderEmail = _configuration["Email:SenderEmail"]!;
+            var senderPassword = _configuration["Email:SenderPassword"]!;
+            var senderName = _configuration["Email:SenderName"] ?? "RentWheels";
+
+            var message = new MimeMessage();
+            message.From.Add(new MailboxAddress(senderName, senderEmail));
+            message.To.Add(new MailboxAddress(customerName, toEmail));
+            message.Subject = $"RentWheels — Security Deposit Refund for Booking #{bookingId}";
+
+            var damageSection = damageCost > 0
+                ? $@"<tr>
+                      <td style=""padding:8px 16px;color:#6b7280;font-size:14px;"">Damage Deduction</td>
+                      <td style=""padding:8px 16px;text-align:right;font-size:14px;color:#ef4444;font-weight:600;"">- ₹{damageCost:N2}</td>
+                    </tr>"
+                : "";
+
+            var stripeRefSection = !string.IsNullOrEmpty(stripeRefundId)
+                ? $@"<div style=""background:#f0f5ff;border:1px solid #dbeafe;border-radius:8px;padding:12px;margin-top:16px;text-align:center;"">
+                      <span style=""font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#6b7280;"">Stripe Refund Reference</span><br/>
+                      <strong style=""font-size:14px;color:#0061f2;"">{stripeRefundId}</strong>
+                    </div>"
+                : "";
+
+            var damageDocSection = !string.IsNullOrEmpty(damagePdfLink)
+                ? $@"<div style=""margin-top:24px;text-align:center;padding:16px;background:#fff5f5;border:1px solid #fecaca;border-radius:12px;"">
+                      <p style=""font-size:14px;color:#991b1b;margin:0 0 12px;font-weight:600;"">Damage Report Details</p>
+                      <a href=""{damagePdfLink}"" style=""background:#ef4444;color:#fff;padding:10px 24px;text-decoration:none;border-radius:8px;font-weight:600;display:inline-block;font-size:14px;"">📄 View Damage Report PDF</a>
+                      <p style=""font-size:12px;color:#7f1d1d;margin:12px 0 0;"">This document contains the exact details of the damage and the reason for the deposit deduction.</p>
+                    </div>"
+                : "";
+
+            var htmlBody = $@"
+<!DOCTYPE html>
+<html>
+<head><meta charset=""utf-8"" /><meta name=""viewport"" content=""width=device-width,initial-scale=1"" /></head>
+<body style=""margin:0;padding:0;background:#f3f4f6;font-family:'Segoe UI',Roboto,Arial,sans-serif;"">
+<div style=""max-width:600px;margin:0 auto;padding:24px;"">
+
+  <div style=""background:linear-gradient(135deg,#059669,#10b981);border-radius:16px 16px 0 0;padding:32px;text-align:center;"">
+    <h1 style=""color:#fff;margin:0;font-size:28px;"">🚗 RentWheels</h1>
+    <p style=""color:rgba(255,255,255,0.85);margin:8px 0 0;font-size:14px;"">Security Deposit Refund Confirmation</p>
+  </div>
+
+  <div style=""background:#fff;padding:32px;border-radius:0 0 16px 16px;box-shadow:0 4px 20px rgba(0,0,0,0.08);"">
+    <p style=""font-size:16px;color:#1f2937;margin:0 0 4px;"">Hello <strong>{customerName}</strong>,</p>
+    <p style=""font-size:14px;color:#6b7280;margin:0 0 24px;"">Great news! Your security deposit for <strong>{vehicleName}</strong> (Booking #{bookingId}) has been processed for refund.</p>
+
+    <div style=""background:#f9fafb;border-radius:12px;padding:20px;margin-bottom:24px;"">
+      <table style=""width:100%;"">
+        <tr>
+          <td style=""padding:8px 16px;color:#6b7280;font-size:14px;"">Original Deposit</td>
+          <td style=""padding:8px 16px;text-align:right;font-size:14px;color:#374151;font-weight:600;"">₹{depositAmount:N2}</td>
+        </tr>
+        {damageSection}
+        <tr>
+          <td colspan=""2""><hr style=""border:none;border-top:2px solid #e5e7eb;margin:8px 16px;"" /></td>
+        </tr>
+        <tr>
+          <td style=""padding:8px 16px;font-size:18px;font-weight:700;color:#1f2937;"">Refund Amount</td>
+          <td style=""padding:8px 16px;text-align:right;font-size:18px;font-weight:700;color:#10b981;"">₹{refundAmount:N2}</td>
+        </tr>
+      </table>
+    </div>
+
+    {stripeRefSection}
+
+    {damageDocSection}
+
+    <div style=""text-align:center;margin-top:24px;"">
+      <span style=""background:#d1fae5;color:#059669;padding:8px 20px;border-radius:50px;font-weight:600;font-size:14px;"">
+        ✅ Refund Processed
+      </span>
+    </div>
+
+    <p style=""font-size:13px;color:#9ca3af;margin-top:20px;text-align:center;"">
+      The refund will be credited to your original payment method within 5-10 business days.<br/>
+      Thank you for choosing <strong>RentWheels</strong>!
+    </p>
+  </div>
+
+  <p style=""text-align:center;font-size:11px;color:#9ca3af;margin-top:16px;"">
+    This is an automated email. Please do not reply directly to this message.
+  </p>
+
+</div>
+</body>
+</html>";
+
+            var bodyBuilder = new BodyBuilder { HtmlBody = htmlBody };
+            message.Body = bodyBuilder.ToMessageBody();
+
+            using var client = new SmtpClient();
+            await client.ConnectAsync(smtpHost, smtpPort, SecureSocketOptions.StartTls);
+            await client.AuthenticateAsync(senderEmail, senderPassword);
+            await client.SendAsync(message);
+            await client.DisconnectAsync(true);
+        }
     }
 }

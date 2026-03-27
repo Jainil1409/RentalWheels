@@ -130,6 +130,16 @@ namespace vehicle_management_system_mvc.Controllers
                 };
 
                 _context.Payments.Add(payment);
+
+                // Admin notification for cash booking payment
+                var notification = new Notification
+                {
+                    Message = $"New booking payment received: ₹{payment.Amount:N2} (Cash) for Booking #{model.BookingId}.",
+                    Type = "Payment",
+                    BookingId = model.BookingId
+                };
+                _context.Notifications.Add(notification);
+
                 await _context.SaveChangesAsync();
 
                 // Send invoice email
@@ -221,6 +231,15 @@ namespace vehicle_management_system_mvc.Controllers
             };
 
             _context.Payments.Add(payment);
+
+            var notification = new Notification
+            {
+                Message = $"New booking payment received: ₹{payment.Amount:N2} for Booking #{bookingId}.",
+                Type = "Payment",
+                BookingId = bookingId
+            };
+            _context.Notifications.Add(notification);
+
             await _context.SaveChangesAsync();
 
             // Send invoice email
@@ -263,6 +282,16 @@ namespace vehicle_management_system_mvc.Controllers
             if (paymentMethod == "Cash")
             {
                 report.IsPaid = true;
+
+                // Admin notification for cash damage payment
+                var notification = new Notification
+                {
+                    Message = $"Damage penalty payment received: ₹{report.DamageCost:N2} (Cash) for Damage Report #{reportId}.",
+                    Type = "DamagePayment",
+                    BookingId = report.BookingId
+                };
+                _context.Notifications.Add(notification);
+
                 await _context.SaveChangesAsync();
 
                 TempData["Success"] = $"Cash payment of ₹{report.DamageCost:N2} for damage penalty completed successfully.";
@@ -333,6 +362,15 @@ namespace vehicle_management_system_mvc.Controllers
             }
 
             report.IsPaid = true;
+
+            var notification = new Notification
+            {
+                Message = $"Damage penalty payment received: ₹{report.DamageCost:N2} for Damage Report #{reportId}.",
+                Type = "DamagePayment",
+                BookingId = report.BookingId
+            };
+            _context.Notifications.Add(notification);
+
             await _context.SaveChangesAsync();
 
             TempData["Success"] = $"Stripe payment of ₹{report.DamageCost:N2} for damage penalty completed successfully.";

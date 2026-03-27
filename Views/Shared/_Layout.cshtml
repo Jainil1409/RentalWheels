@@ -196,6 +196,7 @@
                 int pendingPaymentCount = 0;
                 int kycNotificationCount = 0;
                 int damageReportCount = 0;
+                int depositRefundCount = 0;
                 if (User.IsInRole("Customer"))
                 {
                     var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -212,10 +213,12 @@
                         }
 
                         damageReportCount = _context.DamageReports.Count(d => d.Booking != null && d.Booking.CustomerId == userId && !d.IsPaid);
+
+                        depositRefundCount = _context.Notifications.Count(n => n.UserId == userId && n.Type == "DepositRefund" && !n.IsRead);
                     }
                 }
                 
-                int totalUserNotifications = pendingPaymentCount + kycNotificationCount + damageReportCount;
+                int totalUserNotifications = pendingPaymentCount + kycNotificationCount + damageReportCount + depositRefundCount;
 
                 <div id="user-notification-data" data-count="@totalUserNotifications" style="display:none;"></div>
 
@@ -278,7 +281,11 @@
       </nav>
     </header>
 
-    <div style="@(User.Identity?.IsAuthenticated == true && User.IsInRole("Admin") ? "" : "padding-top: 70px;")">
+    @{
+        var isAuthPage = ViewData["IsAuthPage"]?.ToString() == "true";
+        var isNoPadding = isAuthPage || (User.Identity?.IsAuthenticated == true && User.IsInRole("Admin"));
+    }
+    <div style="@(isNoPadding ? "" : "padding-top: 70px;")">
 
       @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Admin"))
       {

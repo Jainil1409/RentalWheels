@@ -31,6 +31,13 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.LoginPath = "/Account/Login";
         options.AccessDeniedPath = "/Account/Login";
         options.ExpireTimeSpan = TimeSpan.FromHours(8);
+    })
+    .AddGoogle(options =>
+    {
+        var clientId = builder.Configuration["Authentication:Google:ClientId"];
+        var clientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+        options.ClientId = string.IsNullOrEmpty(clientId) ? "YOUR_GOOGLE_CLIENT_ID" : clientId;
+        options.ClientSecret = string.IsNullOrEmpty(clientSecret) ? "YOUR_GOOGLE_CLIENT_SECRET" : clientSecret;
     });
 
 var app = builder.Build();

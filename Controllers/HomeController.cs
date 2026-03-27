@@ -91,7 +91,20 @@ namespace vehicle_management_system_mvc.Controllers
                 .OrderByDescending(dr => dr.CreatedAt)
                 .ToListAsync();
 
+            var depositRefundNotifications = await _context.Notifications
+                .Where(n => n.UserId == userId && n.Type == "DepositRefund")
+                .OrderByDescending(n => n.CreatedAt)
+                .ToListAsync();
+
+            // Mark deposit refund notifications as read
+            foreach (var n in depositRefundNotifications.Where(n => !n.IsRead))
+            {
+                n.IsRead = true;
+            }
+            await _context.SaveChangesAsync();
+
             ViewBag.DamageReports = damageReports;
+            ViewBag.DepositRefundNotifications = depositRefundNotifications;
 
             return View(approvedBookings);
         }
@@ -135,6 +148,19 @@ namespace vehicle_management_system_mvc.Controllers
             ViewBag.RecentPayments = recentPayments;
             ViewBag.DamagePayments = damagePayments;
             ViewBag.PendingVerifications = pendingVerifications;
+
+            // Mark admin notifications as read when viewed
+            var unreadNotifications = await _context.Notifications
+                .Where(n => !n.IsRead && n.UserId == null)
+                .ToListAsync();
+            foreach (var n in unreadNotifications)
+            {
+                n.IsRead = true;
+            }
+            if (unreadNotifications.Any())
+            {
+                await _context.SaveChangesAsync();
+            }
 
             return View();
         }

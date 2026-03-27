@@ -15,7 +15,7 @@ namespace vehicle_management_system_mvc.Data
         public DbSet<Booking> Bookings => Set<Booking>();
         public DbSet<Payment> Payments => Set<Payment>();
         public DbSet<DamageReport> DamageReports => Set<DamageReport>();
-
+        public DbSet<Notification> Notifications => Set<Notification>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

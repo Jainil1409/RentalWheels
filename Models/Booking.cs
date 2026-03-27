@@ -50,6 +50,9 @@ namespace vehicle_management_system_mvc.Models
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+        [StringLength(200)]
+        public string? StripeDepositRefundId { get; set; }
+
         public Payment? Payment { get; set; }
         public DamageReport? DamageReport { get; set; }
     }

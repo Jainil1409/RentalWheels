@@ -106,31 +106,42 @@ else
                                 }
                             </td>
                             <td>
-                                @if (booking.Status == BookingStatus.Approved && booking.Payment == null)
-                                {
-                                    <a asp-controller="Payments" asp-action="Create" asp-route-bookingId="@booking.Id" class="btn btn-sm btn-success">
-                                        <i class="bi bi-credit-card me-1"></i>Pay
-                                    </a>
-                                }
-                                else if (booking.Status == BookingStatus.Pending)
-                                {
-                                    <form asp-action="Cancel" asp-route-id="@booking.Id" method="post" class="d-inline">
-                                        @Html.AntiForgeryToken()
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">
-                                            <i class="bi bi-x-circle me-1"></i>Cancel
-                                        </button>
-                                    </form>
-                                }
-                                else if (booking.Payment != null)
-                                {
-                                    <a asp-controller="Payments" asp-action="Invoice" asp-route-paymentId="@booking.Payment.Id" class="btn btn-sm btn-outline-primary" title="View Invoice">
-                                        <i class="bi bi-file-earmark-text me-1"></i>Invoice
-                                    </a>
-                                }
-                                else
-                                {
-                                    <span class="text-muted">&mdash;</span>
-                                }
+                                <div class="d-flex flex-wrap gap-2">
+                                    @if (booking.Status == BookingStatus.Approved && booking.Payment == null)
+                                    {
+                                        <a asp-controller="Payments" asp-action="Create" asp-route-bookingId="@booking.Id" class="btn btn-sm btn-success">
+                                            <i class="bi bi-credit-card me-1"></i>Pay
+                                        </a>
+                                    }
+                                    else if (booking.Status == BookingStatus.Pending)
+                                    {
+                                        <form asp-action="Cancel" asp-route-id="@booking.Id" method="post" class="m-0">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="bi bi-x-circle me-1"></i>Cancel
+                                            </button>
+                                        </form>
+                                    }
+                                    
+                                    @if (booking.Payment != null)
+                                    {
+                                        <a asp-controller="Payments" asp-action="Invoice" asp-route-paymentId="@booking.Payment.Id" class="btn btn-sm btn-outline-primary" title="View Invoice">
+                                            <i class="bi bi-receipt me-1"></i>Invoice
+                                        </a>
+                                    }
+
+                                    @if (booking.DamageReport != null && !string.IsNullOrEmpty(booking.DamageReport.PdfUrl))
+                                    {
+                                        <a href="@booking.DamageReport.PdfUrl" class="btn btn-sm btn-outline-danger" title="Damage Report">
+                                            <i class="bi bi-file-pdf me-1"></i>Damage Report
+                                        </a>
+                                    }
+                                    
+                                    @if (booking.Status != BookingStatus.Pending && booking.Status != BookingStatus.Approved && booking.Payment == null && booking.DamageReport == null)
+                                    {
+                                        <span class="text-muted py-1">&mdash;</span>
+                                    }
+                                </div>
                             </td>
                         </tr>
                     }

@@ -3,12 +3,13 @@
     ViewData["Title"] = "Notifications";
     var currentUser = ViewBag.CurrentUser as vehicle_management_system_mvc.Models.User;
     var damageReports = ViewBag.DamageReports as List<vehicle_management_system_mvc.Models.DamageReport>;
+    var depositRefundNotifications = ViewBag.DepositRefundNotifications as List<vehicle_management_system_mvc.Models.Notification>;
     
     bool isKycPending = currentUser != null && !string.IsNullOrEmpty(currentUser.DriverLicenseNumber) && !currentUser.IsVerified;
     bool isProfileIncomplete = currentUser != null && string.IsNullOrEmpty(currentUser.DriverLicenseNumber);
     int kycNotificationCount = (isKycPending || isProfileIncomplete) ? 1 : 0;
     
-    int totalCount = (Model?.Count ?? 0) + (damageReports?.Count ?? 0) + kycNotificationCount;
+    int totalCount = (Model?.Count ?? 0) + (damageReports?.Count ?? 0) + (depositRefundNotifications?.Count ?? 0) + kycNotificationCount;
 }
 
 <div class="container notification-container">
@@ -119,6 +120,35 @@
                     </div>
                 }
             }
+
+            @if (depositRefundNotifications != null)
+            {
+                foreach (var notification in depositRefundNotifications)
+                {
+                    <div class="notification-item bg-white p-4 mb-3 rounded-4 shadow-sm border border-success">
+                        <div class="row align-items-center g-4">
+                            <div class="col-auto">
+                                <div class="notification-icon bg-success text-white rounded-circle d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-wallet2 fs-5"></i>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <h6 class="fw-bold text-success mb-1">Deposit Refund Processed</h6>
+                                <p class="text-dark mb-1" style="font-size: 0.95rem; line-height: 1.5;">
+                                    @notification.Message
+                                </p>
+                                <span class="text-muted small"><i class="bi bi-clock me-1"></i>@notification.CreatedAt.ToString("MMM dd, yyyy HH:mm")</span>
+                            </div>
+                            <div class="col-md-3 col-12 text-md-end border-md-start border-success ps-md-4">
+                                <span class="badge bg-success rounded-pill px-3 py-2">
+                                    <i class="bi bi-check-circle me-1"></i>Refunded
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+
 
             @if (Model != null)
             {
