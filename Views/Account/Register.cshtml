@@ -4,63 +4,231 @@
     ViewData["IsAuthPage"] = "true";
 }
 
-<div class="auth-page">
-    <div class="auth-card" style="max-width: 520px;">
-        <img src="~/images/logo.png" alt="RentWheels" class="auth-logo" />
-        <h3>Create Account</h3>
-        <p class="auth-subtitle">Join RentWheels and start renting vehicles today</p>
-        <form asp-action="Register" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
-            
-            <div class="row">
-                <div class="col-6 mb-2">
-                    <label asp-for="FullName" class="form-label mb-1"><i class="bi bi-person me-1"></i>Full Name</label>
-                    <input asp-for="FullName" class="form-control form-control-sm" placeholder="Jainil Vyas" />
-                    <span asp-validation-for="FullName" class="text-danger small"></span>
+<style>
+    .step-indicator {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 24px;
+        position: relative;
+    }
+    .step-indicator::before {
+        content: '';
+        position: absolute;
+        top: 20px;
+        left: 30px;
+        right: 30px;
+        height: 3px;
+        background: #e9ecef;
+        z-index: 1;
+    }
+    .step {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #e9ecef;
+        color: #6c757d;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        z-index: 2;
+        border: 3px solid #fff;
+        font-size: 1rem;
+    }
+    .step.active {
+        background: #0d6efd;
+        color: white;
+    }
+    .step.completed {
+        background: #198754;
+        color: white;
+    }
+    .step-label-container {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 8px;
+        margin-bottom: 24px;
+        font-size: 0.9rem;
+        color: #6c757d;
+        font-weight: 600;
+    }
+    .auth-divider {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        color: #6c757d;
+    }
+    .auth-divider::before, .auth-divider::after {
+        content: '';
+        flex: 1;
+        border-bottom: 1px solid #dee2e6;
+    }
+    .auth-divider::before {
+        margin-right: .5em;
+    }
+    .auth-divider::after {
+        margin-left: .5em;
+    }
+</style>
+
+<div class="row align-items-center justify-content-center min-vh-100 py-5">
+    <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+        <div class="card shadow-lg border-0 rounded-4 mt-5 mb-5">
+            <div class="card-body p-4 p-md-5">
+                <div class="text-center mb-4">
+                    <img src="~/images/logo.png" alt="RentWheels Logo" class="img-fluid mb-3" style="max-height: 80px; width: auto;" />      
+                    <h3 class="fw-bold text-primary">Create Account</h3>
+                    <p class="text-muted">Join RentWheels and start renting vehicles today</p>
                 </div>
-                <div class="col-6 mb-2">
-                    <label asp-for="Phone" class="form-label mb-1"><i class="bi bi-telephone me-1"></i>Phone</label>
-                    <input asp-for="Phone" class="form-control form-control-sm" placeholder="9876543210" />
-                    <span asp-validation-for="Phone" class="text-danger small"></span>
+
+                <div class="step-indicator">
+                    <div class="step active" id="step1-indicator">1</div>
+                    <div class="step" id="step2-indicator">2</div>
                 </div>
+                <div class="step-label-container">
+                    <span>Account Details</span>
+                    <span>Verification</span>
+                </div>
+
+                <form id="externalGoogleForm" asp-action="ExternalLogin" method="post" style="display:none;">
+                    <input type="hidden" name="provider" value="Google" />
+                </form>
+
+                <form asp-action="Register" method="post" enctype="multipart/form-data" id="registerForm">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3"></div>
+
+                    <!-- Step 1: Account Info -->
+                    <div id="step1">
+                        <div class="row g-3 mb-3">
+                            <div class="col-sm-6">
+                                <label asp-for="FullName" class="form-label fw-semibold"><i class="bi bi-person me-1"></i>Full Name</label>
+                                <input asp-for="FullName" class="form-control" placeholder="Jainil Vyas" />
+                                <span asp-validation-for="FullName" class="text-danger small"></span>
+                            </div>
+                            <div class="col-sm-6">
+                                <label asp-for="Phone" class="form-label fw-semibold"><i class="bi bi-telephone me-1"></i>Phone</label>
+                                <input asp-for="Phone" class="form-control" placeholder="9876543210" />
+                                <span asp-validation-for="Phone" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label fw-semibold"><i class="bi bi-envelope me-1"></i>Email</label>
+                            <input asp-for="Email" class="form-control" placeholder="you@domain.com" />
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-sm-6">
+                                <label asp-for="Password" class="form-label fw-semibold"><i class="bi bi-lock me-1"></i>Password</label>
+                                <input asp-for="Password" type="password" class="form-control" />
+                                <span asp-validation-for="Password" class="text-danger small"></span>
+                            </div>
+                            <div class="col-sm-6">
+                                <label asp-for="ConfirmPassword" class="form-label fw-semibold"><i class="bi bi-lock-fill me-1"></i>Confirm</label>
+                                <input asp-for="ConfirmPassword" type="password" class="form-control" />
+                                <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <button type="button" class="btn btn-primary btn-lg w-100 rounded-3 shadow-sm" onclick="nextStep()">
+                            Continue <i class="bi bi-arrow-right ms-2"></i>
+                        </button>
+
+                        <div class="auth-divider my-4 text-muted small text-uppercase fw-bold">or register with</div>
+
+                        <div class="mb-4">
+                            <button type="button" onclick="document.getElementById('externalGoogleForm').submit();" class="btn btn-outline-dark btn-lg w-100 rounded-3 shadow-sm d-flex align-items-center justify-content-center" title="Sign up using your Google account">
+                                <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google Logo" style="width: 24px; height: 24px;" class="me-2" />    
+                                Continue with Google
+                            </button>
+                        </div>
+
+                        <p class="text-center mb-0 mt-3 text-muted">Already have an account? <a asp-action="Login" class="fw-semibold text-decoration-none text-primary">Sign in instead</a></p>
+                    </div>
+
+                    <!-- Step 2: KYC & License -->
+                    <div id="step2" style="display: none;">
+                        <div class="alert alert-info rounded-3 mb-4 border-0">
+                            <i class="bi bi-info-circle-fill me-2 align-middle"></i> <span class="align-middle">ID verification is required to rent vehicles safely.</span>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-sm-6">
+                                <label asp-for="DriverLicenseNumber" class="form-label fw-semibold"><i class="bi bi-card-heading me-1"></i>License Number</label>
+                                <input asp-for="DriverLicenseNumber" class="form-control" placeholder="XX-1234567" />
+                                <span asp-validation-for="DriverLicenseNumber" class="text-danger small"></span>
+                            </div>
+                            <div class="col-sm-6">
+                                <label asp-for="LicenseExpiryDate" class="form-label fw-semibold"><i class="bi bi-calendar-event me-1"></i>License Expiry</label>
+                                <input asp-for="LicenseExpiryDate" class="form-control" type="date" />
+                                <span asp-validation-for="LicenseExpiryDate" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Address" class="form-label fw-semibold"><i class="bi bi-house me-1"></i>Residential Address</label>
+                            <input asp-for="Address" class="form-control" placeholder="Full address details" />
+                            <span asp-validation-for="Address" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="IdProofFile" class="form-label fw-semibold"><i class="bi bi-cloud-upload me-1"></i>Upload License (File)</label>
+                            <input asp-for="IdProofFile" type="file" class="form-control" accept="image/*,.pdf" />
+                            <span asp-validation-for="IdProofFile" class="text-danger small"></span>
+                            <div class="form-text">Clear photo or scan required. Accepted formats: JPG, PNG, PDF.</div>
+                        </div>
+
+                        <div class="d-flex gap-3 mt-4">
+                            <button type="button" class="btn btn-outline-secondary btn-lg rounded-3 flex-shrink-0" style="width: 120px;" onclick="prevStep()">
+                                <i class="bi bi-arrow-left me-1"></i> Back
+                            </button>
+                            <button type="submit" class="btn btn-primary btn-lg rounded-3 flex-grow-1 shadow-sm">
+                                <i class="bi bi-check-circle me-1"></i> Complete Registration
+                            </button>
+                        </div>
+                    </div>
+                </form>
             </div>
-
-            <div class="mb-2">
-                <label asp-for="Email" class="form-label mb-1"><i class="bi bi-envelope me-1"></i>Email</label>
-                <input asp-for="Email" class="form-control form-control-sm" placeholder="you@gmail.com" />
-                <span asp-validation-for="Email" class="text-danger small"></span>
-            </div>
-
-            <div class="row">
-                <div class="col-6 mb-2">
-                    <label asp-for="Password" class="form-label mb-1"><i class="bi bi-lock me-1"></i>Password</label>
-                    <input asp-for="Password" type="password" class="form-control form-control-sm" />
-                    <span asp-validation-for="Password" class="text-danger small"></span>
-                </div>
-                <div class="col-6 mb-2">
-                    <label asp-for="ConfirmPassword" class="form-label mb-1"><i class="bi bi-lock-fill me-1"></i>Confirm</label>
-                    <input asp-for="ConfirmPassword" type="password" class="form-control form-control-sm" />
-                    <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
-                </div>
-            </div>
-
-            <button type="submit" class="btn btn-primary w-100 py-2">
-                <i class="bi bi-person-plus me-2"></i>Create Account
-            </button>
-        </form>
-        <div class="auth-divider">or</div>
-
-        <form asp-action="ExternalLogin" method="post" class="mb-2">
-            <button type="submit" name="provider" value="Google" class="btn btn-outline-dark w-100 fw-semibold d-flex align-items-center justify-content-center py-2" title="Sign up using your Google account">
-                <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google Logo" style="width: 20px; height: 20px;" class="me-2" />
-                Continue with Google
-            </button>
-        </form>
-
-        <p class="text-center mb-0 small">Already have an account? <a asp-action="Login" class="fw-semibold">Sign in</a></p>
+        </div>
     </div>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        function validateStep1() {
+            var isValid = true;
+            $('#step1 input').each(function () {
+                var $input = $(this);
+                // Trigger jQuery validation for the field
+                if (!$input.valid()) {
+                    isValid = false;
+                }
+            });
+            // Also check passwords match
+            var pw = $('#Password').val();
+            var confPw = $('#ConfirmPassword').val();
+            if(pw && confPw && pw !== confPw) {
+                isValid = false;
+            }
+            return isValid;
+        }
+
+        function nextStep() {
+            if (validateStep1()) {
+                $('#step1').hide();
+                $('#step2').fadeIn();
+                $('#step1-indicator').removeClass('active').addClass('completed');
+                $('#step2-indicator').addClass('active');
+            }
+        }
+
+        function prevStep() {
+            $('#step2').hide();
+            $('#step1').fadeIn();
+            $('#step2-indicator').removeClass('active');
+            $('#step1-indicator').addClass('active').removeClass('completed');
+        }
+    </script>
 }

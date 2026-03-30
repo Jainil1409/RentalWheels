@@ -3,6 +3,15 @@
     ViewData["Tittle"] = "Home";
 }
 
+@if (TempData["PendingVerification"] != null)
+{
+    <div class="alert alert-warning alert-dismissible fade show text-center rounded-0 mb-0 shadow-sm border-0 border-bottom border-warning" role="alert" style="z-index: 1050; position: relative; background-color: #fffbdf;">
+        <i class="bi bi-clock-history me-2 fs-5 text-warning align-middle"></i>
+        <strong>Registration Successful!</strong> Your account is currently pending admin verification. Feel free to explore our vehicles, you will be able to book once your details are verified.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
 <div class="hero-driveonix">
     <div class="hero-bg-text">Drive</div>
     <div class="container-fluid px-4 px-xl-5 hero-container">

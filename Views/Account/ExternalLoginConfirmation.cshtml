@@ -1,40 +1,82 @@
 @model vehicle_management_system_mvc.ViewModels.ExternalLoginConfirmationViewModel
+
 @{
     ViewData["Title"] = "Complete Registration";
 }
-
-<div class="auth-page">
-    <div class="auth-card" style="max-width: 520px;">
-        <img src="~/images/logo.png" alt="RentWheels" class="auth-logo" />
-        <h3>Complete Registration</h3>
-        <p class="auth-subtitle">Welcome, @Model.FullName! Please provide your phone number to complete your registration with Google.</p>
-        
-        <form asp-action="ExternalLoginConfirmationPost" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-            
-            <input type="hidden" asp-for="Email" />
-            <input type="hidden" asp-for="FullName" />
-
-            <div class="mb-3 text-muted bg-light p-3 rounded border">
-                <div class="d-flex align-items-center mb-2">
-                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" style="width: 20px; height: 20px;" class="me-2" />
-                    <strong>Google Account Connected</strong>
+<div class="row align-items-center justify-content-center min-vh-100 py-4">
+    <div class="col-12 col-md-10 col-lg-8">
+        <div class="card shadow-lg border-0 rounded-4">
+            <div class="card-body p-4 p-md-5">
+                <div class="text-center mb-4">
+                    <img src="~/images/logo.png" alt="RentWheels Logo" class="img-fluid mb-3" style="max-height: 80px; width: auto;" />
+                    <h2 class="fw-bold text-primary">Complete Profile</h2>
+                    <p class="text-muted">Welcome, @Model.FullName! Please provide your licensing details to complete your Google registration.</p>
                 </div>
-                <div><i class="bi bi-person me-2"></i>@Model.FullName</div>
-                <div><i class="bi bi-envelope me-2"></i>@Model.Email</div>
-            </div>
 
-            <div class="mb-4">
-                <label asp-for="Phone" class="form-label fw-bold"><i class="bi bi-telephone me-1 text-primary"></i>Phone Number <span class="text-danger">*</span></label>
-                <input asp-for="Phone" class="form-control form-control-lg" placeholder="10-digit phone number" autofocus />
-                <span asp-validation-for="Phone" class="text-danger small"></span>
-                <div class="form-text mt-2"><i class="bi bi-info-circle me-1"></i>A valid phone number is required for vehicle rental tracking and emergency contact.</div>
-            </div>
+                <form asp-action="ExternalLoginConfirmationPost" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" enctype="multipart/form-data">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3"></div>
 
-            <button type="submit" class="btn btn-primary w-100 btn-lg">
-                <i class="bi bi-check-circle me-2"></i>Complete Registration
-            </button>
-        </form>
+                    <input type="hidden" asp-for="Email" />
+                    <input type="hidden" asp-for="FullName" />
+
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6">
+                            <div class="bg-light p-3 rounded-3 h-100 border">
+                                <label class="form-label text-muted small fw-bold text-uppercase mb-2"><i class="bi bi-google me-1"></i>Connected Account</label>
+                                <div class="fw-bold text-truncate fs-5">@Model.FullName</div>
+                                <div class="text-muted small text-truncate">@Model.Email</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="h-100 d-flex flex-column justify-content-center">
+                                <label asp-for="Phone" class="form-label fw-semibold">Phone Number <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light"><i class="bi bi-telephone text-primary"></i></span>
+                                    <input asp-for="Phone" class="form-control form-control-lg" placeholder="10-digit phone number" autofocus autocomplete="off" />
+                                </div>
+                                <span asp-validation-for="Phone" class="text-danger small mt-1"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4" />
+                    <h5 class="fw-bold mb-3"><i class="bi bi-shield-check text-success me-2"></i>Verification Details</h5>
+                    
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="DriverLicenseNumber" class="form-label fw-semibold">License Number <span class="text-danger">*</span></label>
+                            <input asp-for="DriverLicenseNumber" class="form-control" placeholder="XX-1234567" />
+                            <span asp-validation-for="DriverLicenseNumber" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="LicenseExpiryDate" class="form-label fw-semibold">License Expiry Date <span class="text-danger">*</span></label>
+                            <input asp-for="LicenseExpiryDate" class="form-control" type="date" />
+                            <span asp-validation-for="LicenseExpiryDate" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Address" class="form-label fw-semibold">Residential Address <span class="text-danger">*</span></label>
+                        <textarea asp-for="Address" class="form-control" rows="2" placeholder="Full residential address"></textarea>
+                        <span asp-validation-for="Address" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="IdProofFile" class="form-label fw-semibold">Upload ID / License Proof <span class="text-danger">*</span></label>
+                        <input asp-for="IdProofFile" type="file" class="form-control" accept="image/*,.pdf" />
+                        <span asp-validation-for="IdProofFile" class="text-danger small"></span>
+                        <div class="form-text">Clear photo or scan required. Accepted formats: JPG, PNG, PDF.</div>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg rounded-3 fw-bold shadow-sm py-3">
+                            Complete Registration <i class="bi bi-arrow-right ms-2"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 

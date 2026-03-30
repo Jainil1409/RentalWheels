@@ -47,12 +47,32 @@ namespace vehicle_management_system_mvc.Controllers
                 Phone = model.Phone,
                 PasswordHash = model.Password,
                 Role = UserRole.Customer,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                DriverLicenseNumber = model.DriverLicenseNumber,
+                LicenseExpiryDate = model.LicenseExpiryDate.HasValue ? DateTime.SpecifyKind(model.LicenseExpiryDate.Value, DateTimeKind.Utc) : null,
+                Address = model.Address
             };
+
+            if (model.IdProofFile != null && model.IdProofFile.Length > 0)
+            {
+                string uploadsFolder = Path.Combine(_env.WebRootPath, "images", "id_proofs");
+                Directory.CreateDirectory(uploadsFolder);
+                string uniqueFileName = Guid.NewGuid().ToString() + "_" + model.IdProofFile.FileName;
+                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await model.IdProofFile.CopyToAsync(fileStream);
+                }
+                user.IdProofUrl = "/images/id_proofs/" + uniqueFileName;
+                // Since they uploaded proof, they can be reviewed for verification
+                user.IsVerified = false; // Admin will verify this in a real scenario, or we auto-verify
+            }
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
+            TempData["PendingVerification"] = true;
             await SignInUser(user);
             return RedirectToAction("Index", "Home");
         }
@@ -269,6 +289,10 @@ namespace vehicle_management_system_mvc.Controllers
             // User does not exist, ask for phone number to complete registration
             await HttpContext.SignOutAsync(); // Don't persist partial login
 
+            // Clear the User context so the rendered View generates an anonymous AntiForgery token.
+            // This prevents a 400 Bad Request error on form submit because the cookie auth is cleared above.
+            HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity());
+
             var model = new ExternalLoginConfirmationViewModel
             {
                 Email = email,
@@ -305,14 +329,33 @@ namespace vehicle_management_system_mvc.Controllers
                     Phone = model.Phone,
                     PasswordHash = "OAUTH_GOOGLE", // Dummy password since they use Google
                     Role = UserRole.Customer,
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.UtcNow,
+                    DriverLicenseNumber = model.DriverLicenseNumber,
+                    LicenseExpiryDate = model.LicenseExpiryDate.HasValue ? DateTime.SpecifyKind(model.LicenseExpiryDate.Value, DateTimeKind.Utc) : null,
+                    Address = model.Address
                 };
+                
+                if (model.IdProofFile != null && model.IdProofFile.Length > 0)
+                {
+                    string uploadsFolder = Path.Combine(_env.WebRootPath, "images", "id_proofs");
+                    Directory.CreateDirectory(uploadsFolder);
+                    string uniqueFileName = Guid.NewGuid().ToString() + "_" + model.IdProofFile.FileName;
+                    string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await model.IdProofFile.CopyToAsync(fileStream);
+                    }
+                    user.IdProofUrl = "/images/id_proofs/" + uniqueFileName;
+                    user.IsVerified = false; // Admin will verify this in a real scenario, or we auto-verify
+                }
 
                 _context.Users.Add(user);
                 await _context.SaveChangesAsync();
 
+                TempData["PendingVerification"] = true;
                 await SignInUser(user);
-                return LocalRedirect(returnUrl ?? "/");
+                return RedirectToAction("Index", "Home");
             }
 
             ViewData["ReturnUrl"] = returnUrl;
