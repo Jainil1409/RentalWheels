@@ -1,14 +1,9 @@
-@model List<Payment>
+﻿@model vehicle_management_system_mvc.Helpers.PaginatedList<Payment>
 @{
     ViewData["Title"] = "Payments";
 }
 
-<div class="section-header animate-fade-in-up">
-    <h2><i class="bi bi-wallet2 me-2 text-gradient"></i>All Payments</h2>
-    <p>Track all payment transactions in the system.</p>
-</div>
-
-@if (Model.Count == 0)
+@if (Model.Count == 0 && ViewBag.DamagePayments?.Count == 0)
 {
     <div class="alert alert-info animate-fade-in-up">
         <i class="bi bi-info-circle me-2"></i>No payments recorded yet.
@@ -16,6 +11,13 @@
 }
 else
 {
+    var prevDisabledBooking = !Model.HasPreviousPage ? "disabled" : "";
+    var nextDisabledBooking = !Model.HasNextPage ? "disabled" : "";
+    var damagePrevDisabled = ViewBag.HasDamagePreviousPage != null && !(bool)ViewBag.HasDamagePreviousPage ? "disabled" : "";
+    var damageNextDisabled = ViewBag.HasDamageNextPage != null && !(bool)ViewBag.HasDamageNextPage ? "disabled" : "";
+    int damagePage = ViewBag.DamagePageNumber != null ? (int)ViewBag.DamagePageNumber : 1;
+    int damageTotalPages = ViewBag.DamageTotalPages != null ? (int)ViewBag.DamageTotalPages : 1;
+
     <div class="row g-4 mb-4">
         <div class="col-md-3 scroll-animate">
             <div class="stat-card success">
@@ -77,6 +79,21 @@ else
             color: var(--dark) !important;
         }
     </style>
+
+    <div class="card shadow-sm border-0 mb-4 animate-fade-in-up">
+        <div class="card-body">
+            <form asp-action="Index" method="get" class="d-flex w-100 gap-2">
+                <div class="input-group shadow-sm rounded">
+                    <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" class="form-control border-0 bg-light" placeholder="Search by customer name, vehicle, or transaction ID...">
+                    <button type="submit" class="btn btn-primary px-4 rounded-end"><i class="bi bi-search me-1"></i>Search</button>
+                </div>
+                @if (!string.IsNullOrEmpty((string?)ViewData["CurrentFilter"]))
+                {
+                    <a asp-action="Index" class="btn btn-outline-secondary px-4 d-flex align-items-center shadow-sm rounded"><i class="bi bi-x-circle me-2"></i>Clear</a>
+                }
+            </form>
+        </div>
+    </div>
 
     <div class="vrms-table scroll-animate" id="bookingPaymentsTable">
         <div class="table-responsive">
@@ -150,7 +167,7 @@ else
         </div>
     </div>
 
-    @if (ViewBag.DamagePayments != null && ((List<vehicle_management_system_mvc.Models.DamageReport>)ViewBag.DamagePayments).Any())
+    @if (ViewBag.DamagePayments != null && ((vehicle_management_system_mvc.Helpers.PaginatedList<vehicle_management_system_mvc.Models.DamageReport>)ViewBag.DamagePayments).Any())
     {
         <div class="vrms-table scroll-animate" id="damagePaymentsTable" style="display: none;">
             <div class="table-responsive">
@@ -211,4 +228,17 @@ else
             if(damageTable) damageTable.style.display = 'block';
         }
     }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tab = urlParams.get('activeTab');
+        if (tab === 'damage') {
+            const btnDamage = document.getElementById('btnDamage');
+            if (btnDamage) {
+                btnDamage.checked = true;
+                togglePaymentTables('damage');
+            }
+        }
+    });
 </script>
+

@@ -138,14 +138,32 @@ namespace vehicle_management_system_mvc.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> AllBookings()
+        public async Task<IActionResult> AllBookings(string searchString, int? pageNumber)
         {
-            var bookings = await _context.Bookings
+            if (searchString != null)
+            {
+                pageNumber = 1;
+            }
+
+            var query = _context.Bookings
                 .Include(b => b.Customer)
                 .Include(b => b.Vehicle)
                 .Include(b => b.Payment)
-                .OrderByDescending(b => b.CreatedAt)
-                .ToListAsync();
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                query = query.Where(b => 
+                    b.Customer!.FullName.Contains(searchString) || 
+                    b.Vehicle!.Brand.Contains(searchString) || 
+                    b.Vehicle!.Model.Contains(searchString) ||
+                    b.Status.ToString().Contains(searchString));
+            }
+
+            ViewData["CurrentFilter"] = searchString;
+            int pageSize = 10;
+            var bookings = await vehicle_management_system_mvc.Helpers.PaginatedList<Booking>.CreateAsync(
+                query.OrderByDescending(b => b.CreatedAt), pageNumber ?? 1, pageSize);
 
             return View(bookings);
         }
@@ -501,3 +519,4 @@ namespace vehicle_management_system_mvc.Controllers
         }
     }
 }
+

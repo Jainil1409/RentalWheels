@@ -16,12 +16,14 @@ namespace vehicle_management_system_mvc.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IConfiguration _configuration;
         private readonly EmailService _emailService;
+        private readonly ILogger<PaymentsController> _logger;
 
-        public PaymentsController(ApplicationDbContext context, IConfiguration configuration, EmailService emailService)
+        public PaymentsController(ApplicationDbContext context, IConfiguration configuration, EmailService emailService, ILogger<PaymentsController> logger)
         {
             _context = context;
             _configuration = configuration;
             _emailService = emailService;
+            _logger = logger;
         }
 
         private int GetUserId() => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
@@ -31,10 +33,38 @@ namespace vehicle_management_system_mvc.Controllers
             try
             {
                 var customer = await _context.Users.FindAsync(booking.CustomerId);
-                if (customer == null) return;
+                if (customer == null)
+                {
+                    _logger.LogWarning("Invoice email skipped: Customer {CustomerId} not found.", booking.CustomerId);
+                    TempData["EmailError"] = "Invoice email could not be sent — customer record not found.";
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(customer.Email))
+                {
+                    _logger.LogWarning("Invoice email skipped: Customer {CustomerId} has no email.", booking.CustomerId);
+                    TempData["EmailError"] = "Invoice email could not be sent — no email address on file.";
+                    return;
+                }
+
+                // Ensure vehicle data is loaded
+                var vehicle = booking.Vehicle;
+                if (vehicle == null)
+                {
+                    await _context.Entry(booking).Reference(b => b.Vehicle).LoadAsync();
+                    vehicle = booking.Vehicle;
+                }
+
+                if (vehicle == null)
+                {
+                    _logger.LogWarning("Invoice email skipped: Vehicle data not found for Booking {BookingId}.", booking.Id);
+                    TempData["EmailError"] = "Invoice email could not be sent — vehicle data not found.";
+                    return;
+                }
 
                 var days = (booking.EndDate - booking.StartDate).Days;
-                var vehicle = booking.Vehicle;
+
+                _logger.LogInformation("Sending invoice email to {Email} for Payment {PaymentId}...", customer.Email, payment.Id);
 
                 await _emailService.SendInvoiceEmailAsync(
                     toEmail: customer.Email,
@@ -45,14 +75,18 @@ namespace vehicle_management_system_mvc.Controllers
                     rentalPeriod: $"{booking.StartDate:MMM dd, yyyy} — {booking.EndDate:MMM dd, yyyy}",
                     days: days,
                     ratePerDay: vehicle.PricePerDay,
+                    depositAmount: booking.DepositAmount,
                     totalAmount: payment.Amount,
                     paymentMethod: payment.Method.ToString(),
                     paymentDate: payment.PaymentDate,
                     stripeRef: payment.StripePaymentIntentId);
+
+                _logger.LogInformation("Invoice email sent successfully to {Email}.", customer.Email);
             }
-            catch
+            catch (System.Exception ex)
             {
-                // Email failure should not block the payment flow
+                _logger.LogError(ex, "Failed to send invoice email for Payment {PaymentId}.", payment.Id);
+                TempData["EmailError"] = $"Invoice email failed: {ex.Message}";
             }
         }
 
@@ -420,27 +454,102 @@ namespace vehicle_management_system_mvc.Controllers
             return View(payment);
         }
 
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Index()
+        [Authorize]
+        public async Task<IActionResult> DownloadInvoicePdf(int paymentId)
         {
-            var payments = await _context.Payments
+            var payment = await _context.Payments
                 .Include(p => p.Booking)
                     .ThenInclude(b => b!.Customer)
                 .Include(p => p.Booking)
                     .ThenInclude(b => b!.Vehicle)
-                .OrderByDescending(p => p.PaymentDate)
-                .ToListAsync();
+                .FirstOrDefaultAsync(p => p.Id == paymentId);
 
-            var damagePayments = await _context.DamageReports
+            if (payment == null) return NotFound();
+
+            // Customers can only download their own invoices
+            if (User.IsInRole("Customer"))
+            {
+                var userId = GetUserId();
+                if (payment.Booking != null && payment.Booking.CustomerId != userId) return NotFound();
+            }
+
+            var booking = payment.Booking!;
+            var vehicle = booking.Vehicle!;
+            var customer = booking.Customer!;
+            var days = (booking.EndDate - booking.StartDate).Days;
+
+            var pdfBytes = _emailService.GenerateInvoicePdfBytes(
+                customerName: customer.FullName,
+                customerEmail: customer.Email,
+                customerPhone: customer.Phone,
+                invoiceNumber: payment.InvoiceNumber ?? "N/A",
+                vehicleName: $"{vehicle.Brand} {vehicle.Model}",
+                vehicleDetails: $"{vehicle.Type} • {vehicle.Year} • {vehicle.LicensePlate}",
+                rentalPeriod: $"{booking.StartDate:MMM dd, yyyy} — {booking.EndDate:MMM dd, yyyy}",
+                days: days,
+                ratePerDay: vehicle.PricePerDay,
+                depositAmount: booking.DepositAmount,
+                totalAmount: payment.Amount,
+                paymentMethod: payment.Method.ToString(),
+                paymentDate: payment.PaymentDate,
+                paymentId: payment.Id,
+                stripeRef: payment.StripePaymentIntentId);
+
+            return File(pdfBytes, "application/pdf", $"Invoice_{payment.InvoiceNumber ?? payment.Id.ToString()}.pdf");
+        }
+
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Index(string searchString, int? pageNumber, int? damagePageNumber)
+        {
+            if (searchString != null)
+            {
+                pageNumber = 1;
+                damagePageNumber = 1;
+            }
+
+            var paymentsQuery = _context.Payments
+                .Include(p => p.Booking)
+                    .ThenInclude(b => b!.Customer)
+                .Include(p => p.Booking)
+                    .ThenInclude(b => b!.Vehicle)
+                .AsQueryable();
+
+            var damagePaymentsQuery = _context.DamageReports
                 .Include(r => r.Booking)
                     .ThenInclude(b => b!.Customer)
                 .Include(r => r.Booking)
                     .ThenInclude(b => b!.Vehicle)
                 .Where(r => r.IsPaid)
-                .OrderByDescending(r => r.CreatedAt)
-                .ToListAsync();
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                paymentsQuery = paymentsQuery.Where(p => 
+                    p.Booking!.Customer!.FullName.Contains(searchString) || 
+                    (p.StripePaymentIntentId != null && p.StripePaymentIntentId.Contains(searchString)) || 
+                    (p.InvoiceNumber != null && p.InvoiceNumber.Contains(searchString)) ||
+                    p.Booking!.Vehicle!.Brand.Contains(searchString));
+
+                damagePaymentsQuery = damagePaymentsQuery.Where(r => 
+                    r.Booking!.Customer!.FullName.Contains(searchString) || 
+                    r.Booking!.Vehicle!.Brand.Contains(searchString));
+            }
+
+            int pageSize = 10;
+
+            var payments = await vehicle_management_system_mvc.Helpers.PaginatedList<Payment>.CreateAsync(
+                paymentsQuery.OrderByDescending(p => p.PaymentDate), pageNumber ?? 1, pageSize);
+
+            var damagePayments = await vehicle_management_system_mvc.Helpers.PaginatedList<DamageReport>.CreateAsync(
+                damagePaymentsQuery.OrderByDescending(r => r.CreatedAt), damagePageNumber ?? 1, pageSize);
+
+            ViewBag.DamagePageNumber = damagePageNumber ?? 1;
+            ViewBag.HasDamagePreviousPage = damagePayments.HasPreviousPage;
+            ViewBag.HasDamageNextPage = damagePayments.HasNextPage;
+            ViewBag.DamageTotalPages = damagePayments.TotalPages;
 
             ViewBag.DamagePayments = damagePayments;
+            ViewData["CurrentFilter"] = searchString;
 
             return View(payments);
         }

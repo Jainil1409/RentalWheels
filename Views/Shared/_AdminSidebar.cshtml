@@ -21,7 +21,7 @@
     <!-- Sidebar Header -->
     <div class="sidebar-header">
         <div class="sidebar-brand">
-            @* <img src="~/images/logo.png" alt="RentWheels" class="sidebar-logo" /> *@
+            <i class="bi bi-car-front-fill sidebar-logo text-primary fs-3"></i>
             <span class="sidebar-brand-text">RentWheels</span>
         </div>
         <button class="sidebar-toggle-btn d-lg-none" id="sidebarClose" aria-label="Close sidebar">
@@ -32,11 +32,13 @@
     <!-- Admin Profile -->
     <div class="sidebar-profile">
         <div class="profile-avatar">
-            @(User.Identity?.Name?.Substring(0, 1).ToUpper())
+            <i class="bi bi-person-circle"></i>
         </div>
         <div class="profile-info">
-            <span class="profile-name">@User.Identity?.Name</span>
-            <span class="profile-role">System Admin</span>
+            <span class="profile-name fw-bold">@(User.Identity?.Name ?? "System Admin")</span>
+            <span class="profile-role d-flex align-items-center">
+                <i class="bi bi-patch-check-fill text-info me-1"></i> Admin
+            </span>
         </div>
     </div>
 
@@ -116,15 +118,17 @@
                 <i class="bi bi-shield-check"></i>
                 <span>Privacy Policy</span>
             </a>
-            <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline w-100">
-                @Html.AntiForgeryToken()
-                <button type="submit" class="sidebar-link sidebar-logout-btn">
-                    <i class="bi bi-box-arrow-left"></i>
-                    <span>Logout</span>
-                </button>
-            </form>
         </div>
     </nav>
+    <div class="sidebar-footer">
+        <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline w-100">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="sidebar-link sidebar-logout-btn">
+                <i class="bi bi-box-arrow-left"></i>
+                <span>Logout</span>
+            </button>
+        </form>
+    </div>
 </aside>
 
 <!-- Sidebar Overlay for Mobile -->

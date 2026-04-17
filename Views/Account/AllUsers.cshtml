@@ -1,4 +1,4 @@
-@model List<vehicle_management_system_mvc.Models.User>
+@model vehicle_management_system_mvc.Helpers.PaginatedList<vehicle_management_system_mvc.Models.User>
 @{
     ViewData["Title"] = "Manage Customers";
 }
@@ -10,6 +10,21 @@
                 <i class="bi bi-people-fill text-info"></i> Customer Management
             </h2>
             <p class="text-white-50 mb-0 small">Review customer profiles and verify driver licenses.</p>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4 animate-fade-in-up">
+        <div class="card-body">
+            <form asp-action="AllUsers" method="get" class="d-flex w-100 gap-2">
+                <div class="input-group shadow-sm rounded">
+                    <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" class="form-control border-0 bg-light" placeholder="Search by name, email, or phone...">
+                    <button type="submit" class="btn btn-primary px-4 rounded-end"><i class="bi bi-search me-1"></i>Search</button>
+                </div>
+                @if (!string.IsNullOrEmpty((string?)ViewData["CurrentFilter"]))
+                {
+                    <a asp-action="AllUsers" class="btn btn-outline-secondary px-4 d-flex align-items-center shadow-sm rounded"><i class="bi bi-x-circle me-2"></i>Clear</a>
+                }
+            </form>
         </div>
     </div>
 
@@ -94,5 +109,33 @@
                 </tbody>
             </table>
         </div>
+    </div>
+    
+    @{
+        var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
+        var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+    }
+    <div class="d-flex justify-content-between align-items-center mt-4">
+        <div>
+            <span class="text-muted">Page @(Model.TotalPages < Model.PageIndex ? 0 : Model.PageIndex) of @Model.TotalPages</span>
+        </div>
+        <ul class="pagination mb-0">
+            <li class="page-item @prevDisabled">
+                <a asp-action="AllUsers"
+                   asp-route-pageNumber="@(Model.PageIndex - 1)"
+                   asp-route-searchString="@ViewData["CurrentFilter"]"
+                   class="page-link shadow-sm rounded-start">
+                    <i class="bi bi-chevron-left me-1"></i> Previous
+                </a>
+            </li>
+            <li class="page-item @nextDisabled">
+                <a asp-action="AllUsers"
+                   asp-route-pageNumber="@(Model.PageIndex + 1)"
+                   asp-route-searchString="@ViewData["CurrentFilter"]"
+                   class="page-link shadow-sm rounded-end ms-1">
+                    Next <i class="bi bi-chevron-right ms-1"></i>
+                </a>
+            </li>
+        </ul>
     </div>
 </div>

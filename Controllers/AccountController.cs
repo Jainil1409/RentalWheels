@@ -199,9 +199,27 @@ namespace vehicle_management_system_mvc.Controllers
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> AllUsers()
+        public async Task<IActionResult> AllUsers(string searchString, int? pageNumber)
         {
-            var users = await _context.Users.Where(u => u.Role == UserRole.Customer).OrderByDescending(u => u.CreatedAt).ToListAsync();
+            if (searchString != null)
+            {
+                pageNumber = 1;
+            }
+
+            var query = _context.Users.Where(u => u.Role == UserRole.Customer).AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                query = query.Where(u => 
+                    u.FullName.Contains(searchString) || 
+                    u.Email.Contains(searchString) || 
+                    (u.Phone != null && u.Phone.Contains(searchString)));
+            }
+
+            ViewData["CurrentFilter"] = searchString;
+            int pageSize = 10;
+            var users = await vehicle_management_system_mvc.Helpers.PaginatedList<User>.CreateAsync(query.OrderByDescending(u => u.CreatedAt), pageNumber ?? 1, pageSize);
+            
             return View(users);
         }
 

@@ -1,11 +1,61 @@
-@model List<Payment>
+﻿@model vehicle_management_system_mvc.Helpers.PaginatedList<Payment>
 @{
     ViewData["Title"] = "Payment Report";
 }
 
 <div class="section-header animate-fade-in-up">
-    <h2><i class="bi bi-cash-coin me-2 text-gradient"></i>Payment Report</h2>
-    <p>Summary of all payment transactions.</p>
+    <h2><i class="bi bi-cash-stack me-2 text-gradient"></i>Payment Report</h2>
+    <p>Detailed view of all transactions.</p>
+</div>
+
+<div class="row mb-4 animate-fade-in-up scroll-animate">
+    <div class="col-md-3">
+        <div class="card bg-success text-white shadow-sm border-0 h-100">
+            <div class="card-body">
+                <h6 class="card-title text-white-50">Total Revenue</h6>
+                <h3 class="mb-0">₹@Model.Sum(p => p.Amount).ToString("N2")</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-primary text-white shadow-sm border-0 h-100">
+            <div class="card-body">
+                <h6 class="card-title text-white-50">Total Transactions</h6>
+                <h3 class="mb-0">@Model.Count()</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white shadow-sm border-0 h-100">
+            <div class="card-body">
+                <h6 class="card-title text-white-50">Successful</h6>
+                <h3 class="mb-0">@Model.Count(p => p.Status == PaymentStatus.Completed)</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark shadow-sm border-0 h-100">
+            <div class="card-body">
+                <h6 class="card-title text-muted">Pending / Failed</h6>
+                <h3 class="mb-0">@Model.Count(p => p.Status != PaymentStatus.Completed)</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 mb-4 animate-fade-in-up scroll-animate">
+    <div class="card-body">
+        <form asp-action="PaymentReport" method="get" class="d-flex w-100 gap-2" id="searchForm">
+            <div class="input-group shadow-sm rounded">
+                <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" class="form-control border-0 bg-light" placeholder="Search by customer, invoice#, or Stripe ID...">
+                <button type="submit" class="btn btn-primary px-4 rounded-end"><i class="bi bi-search me-1"></i>Search</button>
+            </div>
+            @if (!string.IsNullOrEmpty((string?)ViewData["CurrentFilter"]))
+            {
+                <a asp-action="PaymentReport" class="btn btn-outline-secondary px-4 d-flex align-items-center shadow-sm rounded"><i class="bi bi-x-circle me-2"></i>Clear</a>
+            }
+        </form>
+    </div>
 </div>
 
 @if (Model.Count == 0)
@@ -14,75 +64,103 @@
 }
 else
 {
-    <div class="row g-4 mb-4">
-        <div class="col-md-3 scroll-animate">
-            <div class="stat-card success">
-                <div class="stat-icon"><i class="bi bi-cash-stack"></i></div>
-                <div class="stat-value" data-count="@Model.Where(p => p.Status == PaymentStatus.Completed).Sum(p => p.Amount)" data-prefix="₹" data-decimals="2">₹0</div>
-                <div class="stat-label">Total Collected</div>
-            </div>
-        </div>
-        <div class="col-md-3 scroll-animate">
-            <div class="stat-card primary">
-                <div class="stat-icon"><i class="bi bi-receipt"></i></div>
-                <div class="stat-value" data-count="@Model.Count">0</div>
-                <div class="stat-label">Total Transactions</div>
-            </div>
-        </div>
-        <div class="col-md-3 scroll-animate">
-            <div class="stat-card info">
-                <div class="stat-icon"><i class="bi bi-cash-coin"></i></div>
-                <div class="stat-value" data-count="@Model.Count(p => p.Method == PaymentMethod.Cash)">0</div>
-                <div class="stat-label">Cash</div>
-            </div>
-        </div>
-        <div class="col-md-3 scroll-animate">
-            <div class="stat-card warning">
-                <div class="stat-icon"><i class="bi bi-stripe"></i></div>
-                <div class="stat-value" data-count="@Model.Count(p => p.Method == PaymentMethod.Stripe)">0</div>
-                <div class="stat-label">Stripe</div>
-            </div>
-        </div>
-    </div>
-
     <div class="vrms-table scroll-animate">
         <div class="table-responsive">
             <table class="table table-hover">
                 <thead>
                     <tr>
-                        <th>#</th>
+                        <th>Transaction ID</th>
+                        <th>Invoice #</th>
+                        <th>Date</th>
+                        <th>Type</th>
                         <th>Customer</th>
-                        <th>Vehicle</th>
                         <th>Amount</th>
                         <th>Method</th>
                         <th>Status</th>
-                        <th>Date</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var p in Model)
                     {
                         <tr>
-                            <td><strong>#@p.Id</strong></td>
-                            <td>@p.Booking.Customer.FullName</td>
-                            <td>@p.Booking.Vehicle.Brand @p.Booking.Vehicle.Model</td>
-                            <td><strong>₹@p.Amount.ToString("N2")</strong></td>
-                            <td><span class="badge bg-primary">@p.Method</span></td>
                             <td>
-                                @switch (p.Status)
+                                @if(!string.IsNullOrEmpty(p.StripePaymentIntentId))
                                 {
-                                    case PaymentStatus.Completed: <span class="badge bg-success">Completed</span> break;
-                                    case PaymentStatus.Pending: <span class="badge bg-warning">Pending</span> break;
-                                    case PaymentStatus.Failed: <span class="badge bg-danger">Failed</span> break;
-                                    case PaymentStatus.Refunded: <span class="badge bg-info">Refunded</span> break;
+                                    <span class="font-monospace text-muted" style="font-size: 0.85em;">@p.StripePaymentIntentId</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted"><i class="bi bi-dash"></i></span>
+                                }
+                            </td>
+                            <td>
+                                @if(!string.IsNullOrEmpty(p.InvoiceNumber))
+                                {
+                                    <strong>@p.InvoiceNumber</strong>
                                 }
                             </td>
                             <td>@p.PaymentDate.ToString("MMM dd, yyyy HH:mm")</td>
+                            <td>
+                                @if (p.BookingId != 0)
+                                {
+                                    <span class="badge bg-primary">Rental</span>
+                                    <small class="d-block text-muted">Booking #@p.BookingId</small>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Other</span>
+                                }
+                            </td>
+                            <td>
+                                @if (p.Booking?.Customer != null)
+                                {
+                                    @p.Booking.Customer.FullName
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Unknown</span>
+                                }
+                            </td>
+                            <td><strong>₹@p.Amount.ToString("N2")</strong></td>
+                            <td>@p.Method</td>
+                            <td>
+                                @switch (p.Status)
+                                {
+                                    case PaymentStatus.Pending: <span class="badge bg-warning">Pending</span> break;
+                                    case PaymentStatus.Completed: <span class="badge bg-success">Completed</span> break;
+                                    case PaymentStatus.Failed: <span class="badge bg-danger">Failed</span> break;
+                                    case PaymentStatus.Refunded: <span class="badge bg-secondary">Refunded</span> break;
+                                }
+                            </td>
                         </tr>
                     }
                 </tbody>
             </table>
         </div>
+    </div>
+    
+    <div class="d-flex justify-content-between align-items-center mt-3 mb-4">
+        <div>
+            <span class="text-muted">Page @(Model.TotalPages < Model.PageIndex ? 0 : Model.PageIndex) of @Model.TotalPages</span>
+        </div>
+        <ul class="pagination mb-0">
+            <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "")">
+                <a asp-action="PaymentReport"
+                   asp-route-pageNumber="@(Model.PageIndex - 1)"
+                   asp-route-searchString="@ViewData["CurrentFilter"]"
+                   class="page-link shadow-sm rounded-start">
+                    <i class="bi bi-chevron-left me-1"></i> Previous
+                </a>
+            </li>
+            <li class="page-item @(!Model.HasNextPage ? "disabled" : "")">
+                <a asp-action="PaymentReport"
+                   asp-route-pageNumber="@(Model.PageIndex + 1)"
+                   asp-route-searchString="@ViewData["CurrentFilter"]"
+                   class="page-link shadow-sm rounded-end ms-1">
+                    Next <i class="bi bi-chevron-right ms-1"></i>
+                </a>
+            </li>
+        </ul>
     </div>
 }
 
@@ -91,3 +169,4 @@ else
         <i class="bi bi-arrow-left me-1"></i>Back to Reports
     </a>
 </div>
+
